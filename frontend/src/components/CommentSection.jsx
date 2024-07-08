@@ -74,7 +74,9 @@ const CommentSection = () => {
     return comments.map((comment, index) => (
       <div key={index} className="mx-2">
         <div>
-          <span className=" dark:text-slate-200">{comment.user.username}</span>
+          <span className=" dark:text-slate-200">
+            {comment.userId.username}
+          </span>
           <span className="ml-2 text-sm font-thin dark:text-slate-400">
             {formatDistanceToNow(comment.updatedAt, {
               addSuffix: true,

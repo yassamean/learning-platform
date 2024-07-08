@@ -6,7 +6,7 @@ export async function getCommentsByLecture(req, res) {
       lectureId: req.params.lectureId,
     })
       .populate({
-        path: "user",
+        path: "userId",
         select: "username email",
       })
       .sort({

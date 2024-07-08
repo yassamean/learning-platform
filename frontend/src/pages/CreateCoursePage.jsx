@@ -101,7 +101,7 @@ export default function CreateCoursePage() {
     handleRandomImage();
 
     async function fetchCourse() {
-      const courseId = params.id?.toString() || undefined;
+      const courseId = params.courseId?.toString() || undefined;
       if (!courseId) {
         updateForm({
           lecturedBy: { _id: user.userId, username: user.username },
@@ -141,7 +141,7 @@ export default function CreateCoursePage() {
           body: JSON.stringify(course),
         });
       } else {
-        response = await fetch(`${API_BASE_URL}/edit/${params.id}`, {
+        response = await fetch(`${API_BASE_URL}/courses/${params.courseId}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
