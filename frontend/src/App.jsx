@@ -26,6 +26,10 @@ import LectureListPage from "./pages/LectureListPage";
 import LecturePage from "./pages/LecturePage";
 import CreateLecturePage from "./pages/CreateLecturePage";
 
+import CreateQuizQuestionPage from "./pages/quizzes/teachers/CreateQuizQuestionPage";
+import StudentQuizOverviewPage from "./pages/quizzes/students/StudentQuizOverviewPage";
+import ManageQuizPage from "./pages/quizzes/teachers/ManageQuizPage";
+
 function App() {
   const [search, setSearch] = useState("");
 
@@ -34,7 +38,6 @@ function App() {
       <Layout setSearch={setSearch}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-
           {/* -------------------------------------  */}
           {/* User Account Management Related Pages  */}
           <Route
@@ -84,21 +87,21 @@ function App() {
             }
           />
           <Route
-						path="/teacher/users"
-						element={
-							<ProtectedRoute roles={["teacher"]}>
-								<TeacherDashboardPage />
-							</ProtectedRoute>
-						}
-					/>
-					<Route
-						path="/admin/users"
-						element={
-							<ProtectedRoute roles={["admin"]}>
-								<AdminDashboardPage />
-							</ProtectedRoute>
-						}
-					/>
+            path="/teacher/users"
+            element={
+              <ProtectedRoute roles={["teacher"]}>
+                <TeacherDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            }
+          />
           {/* -------------------------------------  */}
           {/* Courses & Lectures  */}
           <Route
@@ -162,6 +165,40 @@ function App() {
             element={
               <ProtectedRoute roles={["teacher", "admin"]}>
                 <CreateLecturePage />
+              </ProtectedRoute>
+            }
+          />
+          {/* -------------------------------------  */}
+          {/* Quizzes  */}
+          <Route
+            path="/quizzes"
+            element={
+              <ProtectedRoute roles={["student"]}>
+                <StudentQuizOverviewPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/:courseId/lectures/:lectureId/manageQuiz"
+            element={
+              <ProtectedRoute roles={["teacher"]}>
+                <ManageQuizPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/:courseId/lectures/:lectureId/question/"
+            element={
+              <ProtectedRoute roles={["teacher"]}>
+                <CreateQuizQuestionPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/:courseId/lectures/:lectureId/question/:questionId"
+            element={
+              <ProtectedRoute roles={["teacher"]}>
+                <CreateQuizQuestionPage />
               </ProtectedRoute>
             }
           />

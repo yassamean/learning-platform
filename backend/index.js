@@ -1,10 +1,11 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
 import lectureRoutes from "./routes/lectureRoutes.js";
-import commentRoutes from "./routes/commentRoutes.js";
+import quizRoutes from "./routes/quizRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import userDataRoutes from "./routes/userDataRoutes.js";
 import { connectToDatabase } from "./utils/db.js";
 
@@ -16,10 +17,11 @@ app.use(cors());
 app.use(express.json());
 
 app.use(authRoutes);
-app.use(userRoutes);
+app.use(commentRoutes);
 app.use(courseRoutes);
 app.use(lectureRoutes);
-app.use(commentRoutes);
+app.use(quizRoutes);
+app.use(userRoutes);
 app.use(userDataRoutes);
 
 app.listen(3000, () => {

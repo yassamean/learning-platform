@@ -10,6 +10,14 @@ const tiles = [
     buttonLink: "/courses",
   },
   {
+    title: "View Quizzes",
+    description:
+      "View available course quizzes to help keep up with your course material.",
+    buttonText: "Go to Quizzes",
+    role: ["student"],
+    buttonLink: "/quizzes",
+  },
+  {
     title: "Manage Users",
     description: "Administer user accounts and manage roles.",
     buttonText: "Go to User Management",
