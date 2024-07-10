@@ -62,7 +62,7 @@ export async function increaseViewCount(req, res) {
   try {
     const lecture = await Lecture.findById(req.params.lectureId);
     lecture.views += 1;
-    lecture.save();
+    lecture.save({ timestamps: false });
     res.status(200).json(lecture);
   } catch (error) {
     console.error("Error increasing view count:", error);

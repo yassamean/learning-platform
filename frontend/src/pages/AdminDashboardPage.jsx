@@ -71,15 +71,17 @@ const AdminDashboardPage = () => {
   };
 
   return (
-    <div
-      className="container mx-auto mb-auto p-4"
-      style={{ maxHeight: "100%" }}
-    >
-      <header className="sticky top-3 z-10">
-        <h1 className="text-2xl font-bold mb-6 text-center">Admin Dashboard</h1>
+    <div>
+      <header>
+        <h1 className="mt-10 text-2xl font-bold mb-6 text-left dark:text-slate-200">
+          Admin Dashboard
+        </h1>
         {error && <p className="text-red-500">{error}</p>}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="users">
+          <label
+            className="block text-gray-700 mb-2 dark:text-slate-400"
+            htmlFor="users"
+          >
             Filter Users
           </label>
           <input
@@ -88,18 +90,18 @@ const AdminDashboardPage = () => {
             name="users"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded dark:bg-slate-800"
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="roleFilter" className="mr-2">
+          <label htmlFor="roleFilter" className="mr-2 dark:text-slate-400">
             Filter by role
           </label>
           <select
             id="roleFilter"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="p-2 border border-gray-300 rounded"
+            className="p-2 border border-gray-300 rounded dark:text-slate-400 dark:bg-slate-800"
           >
             <option value="all">All</option>
             <option value="admin">Admin</option>
@@ -109,8 +111,8 @@ const AdminDashboardPage = () => {
         </div>
       </header>
       <div className="overflow-x-auto max-h-96">
-        <table className="min-w-full bg-white">
-          <thead className="bg-gray-200 sticky top-0 z-10">
+        <table className="min-w-full bg-white dark:bg-slate-800">
+          <thead className="bg-gray-200 sticky top-0 z-10 dark:bg-slate-600 dark:text-slate-200 text-left">
             <tr>
               <th className="py-2 px-4 border-b">Username</th>
               <th className="py-2 px-4 border-b">Email</th>
@@ -118,7 +120,7 @@ const AdminDashboardPage = () => {
               <th className="py-2 px-4 border-b">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="dark:text-slate-400">
             {filteredUsers.map((u) => (
               <tr key={u._id}>
                 <td className="py-2 px-4 border-b">{u.username}</td>
@@ -130,7 +132,7 @@ const AdminDashboardPage = () => {
                     onChange={(e) =>
                       handleRoleChange(u.username, e.target.value)
                     }
-                    className="p-2 border border-gray-300 rounded"
+                    className="p-2 border cursor-pointer border-gray-300 rounded dark:bg-slate-800 dark:text-slate-400"
                     disabled={u.username === user.username}
                   >
                     <option value="student">Student</option>
@@ -141,7 +143,7 @@ const AdminDashboardPage = () => {
               </tr>
             ))}
           </tbody>
-          <tfoot className="bg-gray-100 sticky bottom-0 z-10">
+          <tfoot className="bg-gray-100 sticky bottom-0 z-10 dark:bg-slate-600 dark:text-slate-400">
             <tr>
               <td className="py-2 px-4 border-t" colSpan="4">
                 {filteredUsers.length} results found

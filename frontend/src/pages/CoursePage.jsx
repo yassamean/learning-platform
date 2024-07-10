@@ -1,5 +1,6 @@
 import {
   AcademicCapIcon,
+  ArrowLeftStartOnRectangleIcon,
   ArrowPathIcon,
   AtSymbolIcon,
   BookOpenIcon,
@@ -10,17 +11,17 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/UserContext";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import VideoCard from "../components/VideoCard";
 import { formatDistanceToNow } from "date-fns";
 
 function CoursePage() {
+  const params = useParams();
   const { user } = useAuth();
   const [course, setCourse] = useState({});
   const [lectures, setLectures] = useState([]);
-  const [mostRecentLecture, setMostRecentLecture] = useState();
-  const params = useParams();
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   useEffect(() => {
     async function getCourse() {
@@ -36,22 +37,78 @@ function CoursePage() {
     }
     getCourse();
 
-    async function getLectures() {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/courses/${params.courseId.toString()}/lectures`
-        );
-        const data = await response.json();
-        setLectures(data);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    getLectures();
-    setMostRecentLecture(lectures.at(0));
-  }, [lectures.length]);
+    getEnrollmentStatus();
+  }, [isEnrolled]);
 
-  return (
+  async function getLectures() {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/courses/${params.courseId.toString()}/lectures`
+      );
+      const data = await response.json();
+      setLectures(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function getEnrollmentStatus() {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/userData/${user.userDataId}/enrollments`
+      );
+      const data = await response.json();
+      if (data.enrollments?.includes(params.courseId)) {
+        setIsEnrolled(true);
+        getLectures();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function addToEnrollments() {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/userData/${user.userDataId}/addEnrollment`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ courseId: params.courseId.toString() }),
+        }
+      );
+      const data = await response.json();
+      if (data.enrollments.includes(params.courseId)) {
+        setIsEnrolled(true);
+        getLectures();
+      }
+    } catch (error) {
+      console.error("Error during enrollment:", error);
+    }
+  }
+
+  async function deleteEnrollment() {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/userData/${user.userDataId}/deleteEnrollment`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ courseId: params.courseId.toString() }),
+        }
+      );
+      const data = await response.json();
+      setIsEnrolled(false);
+    } catch (error) {
+      console.error("Error during enrollment deletion:", error);
+    }
+  }
+
+  return isEnrolled ? (
     <>
       <div className="flex justify-between">
         <div>
@@ -62,19 +119,31 @@ function CoursePage() {
             {course.name}
           </h1>
         </div>
-        {["teacher", "admin"].includes(user.role) && (
-          <div className="flex items-end gap-2">
-            <Link
-              to={`/courses/${params.courseId.toString()}/edit`}
-              className=""
-            >
-              <PencilSquareIcon className="size-8 dark:text-slate-200"></PencilSquareIcon>
-            </Link>
-            <Link to={`/courses/${params.courseId.toString()}/lectures/create`}>
-              <PlusCircleIcon className="size-8 dark:text-slate-200"></PlusCircleIcon>
-            </Link>
-          </div>
-        )}
+        <div className="flex items-end gap-2">
+          {["teacher", "admin"].includes(user.role) && (
+            <>
+              <Link
+                to={`/courses/${params.courseId.toString()}/edit`}
+                className=""
+              >
+                <PencilSquareIcon className="size-8 dark:text-slate-200"></PencilSquareIcon>
+              </Link>
+              <Link
+                to={`/courses/${params.courseId.toString()}/lectures/create`}
+              >
+                <PlusCircleIcon className="size-8 dark:text-slate-200"></PlusCircleIcon>
+              </Link>
+            </>
+          )}
+          {isEnrolled && (
+            <button>
+              <ArrowLeftStartOnRectangleIcon
+                className="size-8 text-red-500"
+                onClick={deleteEnrollment}
+              ></ArrowLeftStartOnRectangleIcon>
+            </button>
+          )}
+        </div>
       </div>
       <div className="mt-10">
         <div className="grid grid-cols-2 gap-x-4">
@@ -82,13 +151,13 @@ function CoursePage() {
             <div className="text-lg mb-2 font-bold dark:text-slate-200">
               Watch the latest Lecture
             </div>
-            {mostRecentLecture && (
+            {lectures.at(0) && (
               <VideoCard
                 path={`/courses/${params.courseId.toString()}/lectures/${
-                  mostRecentLecture._id
+                  lectures.at(0)._id
                 }
               `}
-                data={mostRecentLecture}
+                data={lectures.at(0)}
               ></VideoCard>
             )}
           </div>
@@ -175,6 +244,29 @@ function CoursePage() {
         </div>
       </div>
     </>
+  ) : (
+    <div className="bg-white mt-10 p-8 rounded-lg border mx-auto max-w-md">
+      <h1 className="text-xl mb-6 text-center">
+        Missing enrollment for course:
+      </h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">{course.name}</h1>
+      {course.isOpenToEnroll ? (
+        <div>
+          <p>
+            You are not enrolled to this course. Enroll now to start learning
+            and gain access to all the course materials.
+          </p>
+          <button
+            className="w-full mt-10 bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+            onClick={addToEnrollments}
+          >
+            Enroll
+          </button>
+        </div>
+      ) : (
+        <div>Sadly this course is currently closed for enrollment.</div>
+      )}
+    </div>
   );
 }
 

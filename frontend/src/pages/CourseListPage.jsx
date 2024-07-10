@@ -10,6 +10,7 @@ import { useAuth } from "../context/UserContext";
 export default function CourseListPage({ search }) {
   const [courses, setCourses] = useState([]);
   const { user } = useAuth();
+  const [enrollments, setEnrollments] = useState([]);
 
   useEffect(() => {
     async function getCourses() {
@@ -22,6 +23,18 @@ export default function CourseListPage({ search }) {
       }
     }
     getCourses();
+    async function getEnrollments() {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/userData/${user.userDataId}/enrollments`
+        );
+        const data = await response.json();
+        setEnrollments(data.enrollments);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getEnrollments();
   }, []);
 
   return (
@@ -72,7 +85,16 @@ export default function CourseListPage({ search }) {
                   <p className="text-sm leading-6 text-gray-900 dark:text-slate-400">
                     Updated {new Date(course.updatedAt).toLocaleString()}
                   </p>
-                  {course.isOpenToEnroll ? (
+                  {enrollments.includes(course._id) ? (
+                    <div className="mt-1 flex items-center gap-x-1.5">
+                      <div className="flex-none rounded-full bg-sky-500/20 p-1">
+                        <div className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+                      </div>
+                      <p className="text-xs leading-5 text-gray-500 dark:text-slate-400">
+                        Enrolled
+                      </p>
+                    </div>
+                  ) : course.isOpenToEnroll ? (
                     <div className="mt-1 flex items-center gap-x-1.5">
                       <div className="flex-none rounded-full bg-emerald-500/20 p-1">
                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />

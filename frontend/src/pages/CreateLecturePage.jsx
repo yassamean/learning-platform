@@ -73,7 +73,7 @@ export default function CreateLecturePage() {
         );
       } else {
         response = await fetch(
-          `${API_BASE_URL}/courses/${params.courseId}/edit/${params.lectureId}`,
+          `${API_BASE_URL}/courses/${params.courseId}/lectures/${params.lectureId}`,
           {
             method: "PATCH",
             headers: {

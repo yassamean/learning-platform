@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { UserData } from "./userData.js";
 
 const UserSchema = new Schema({
   username: {
@@ -17,10 +18,23 @@ const UserSchema = new Schema({
   },
   role: {
     type: String,
-    enum: ["admin", "student", "instructor"],
+    enum: ["admin", "student", "teacher"],
     default: "student",
   },
+  userDataId: {
+    type: Schema.ObjectId,
+    ref: "UserData",
+  },
   passwordResetToken: String,
+});
+
+UserSchema.pre("save", async function (next) {
+  if (!this.userDataId) {
+    const userData = new UserData({ userId: this._id });
+    await userData.save();
+    this.userDataId = userData._id;
+  }
+  next();
 });
 
 export const User = model("User", UserSchema);

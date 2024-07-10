@@ -44,6 +44,7 @@ export async function login(req, res) {
           username: user.username,
           email: user.email,
           role: user.role,
+          userDataId: user.userDataId,
         },
         JWT_SECRET,
         { expiresIn: "1h" }
@@ -107,7 +108,13 @@ export async function register(req, res) {
     }
 
     const token = jwt.sign(
-      { userId: result.insertedId, username, role: "student" },
+      {
+        userId: result._id,
+        username,
+        role: "student",
+        email: result.email,
+        userDataId: result.userDataId,
+      },
       JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -160,8 +167,8 @@ export async function createPassword(req, res) {
   try {
     decodedToken = jwt.verify(token, JWT_SECRET);
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(400).json({ message: "Link has expired"});
+    if (error.name === "TokenExpiredError") {
+      return res.status(400).json({ message: "Link has expired" });
     } else {
       return res.status(400).json({ message: "Invalid token" });
     }
@@ -186,9 +193,9 @@ export async function createPassword(req, res) {
 
     // new password cannot be the same as the old password
     if (await bcrypt.compare(password, user.password)) {
-      return res
-        .status(400)
-        .json({ message: "New password cannot be the same as the old password" });
+      return res.status(400).json({
+        message: "New password cannot be the same as the old password",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

@@ -5,11 +5,11 @@ import { formatDistanceToNow } from "date-fns";
 export default function VideoCard(params) {
   return (
     <Link to={params.path}>
-      <div className="group p-1 rounded-lg cursor-pointer bg-gray-50 dark:bg-slate-800 dark:hover:bg-sky-900">
+      <div className="group p-1 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-sky-900">
         <div className="flex border rounded-lg aspect-video bg-gray-900 items-center justify-center">
           <PlayCircleIcon className="text-white w-20 h-20"></PlayCircleIcon>
         </div>
-        <div className="line-clamp-2 font-bold dark:text-slate-200 group-hover:text-sky-400">
+        <div className="line-clamp-2 font-bold dark:text-slate-200 group-hover:dark:text-sky-400">
           {params.data.title}
         </div>
         <div className="flex justify-between text-sm dark:text-slate-400">
