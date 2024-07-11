@@ -5,7 +5,7 @@ import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import { formatDistanceToNow } from "date-fns";
 import { useParams } from "react-router-dom";
 
-const CommentSection = () => {
+const CommentSection = ({ videoSeekTo }) => {
   const params = useParams();
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
@@ -83,9 +83,53 @@ const CommentSection = () => {
             })}
           </span>
         </div>
-        <p className="text-sm dark:text-slate-200">{comment.text}</p>
+        <p className="text-sm dark:text-slate-200">
+          {convertTimestamps(comment.text)}
+        </p>
       </div>
     ));
+  };
+
+  const convertTimestamps = (text) => {
+    const pattern = /\b(\d:[0-5]\d:[0-5]\d|\d:[0-5]\d|[0-5]\d:[0-5]\d)\b/g;
+    // const pattern = /\s(\d:[0-5]\d|[0-5]\d:[0-5]\d|\d:[0-5]\d:[0-5]\d)\s/gm;
+    let match;
+    const timestamps = [];
+    while ((match = pattern.exec(text)) !== null) {
+      const [fullMatch] = match;
+      const startIndex = match.index;
+      const [seconds, minutes, hours] = fullMatch
+        .trim()
+        .split(":")
+        .reverse()
+        .map(Number);
+      const totalSeconds =
+        (hours || 0) * 3600 + (minutes || 0) * 60 + (seconds || 0);
+
+      timestamps.push({
+        match: fullMatch,
+        start: startIndex,
+        end: startIndex + fullMatch.length,
+        seconds: totalSeconds,
+      });
+    }
+
+    let convertedParts = [];
+    let lastIndex = 0;
+    timestamps.forEach((timestamp) => {
+      convertedParts.push(text.substring(lastIndex, timestamp.start));
+      convertedParts.push(
+        <span
+          className="text-sky-600 cursor-pointer"
+          onClick={() => videoSeekTo(timestamp.seconds)}
+        >
+          {timestamp.match}
+        </span>
+      );
+      lastIndex = timestamp.end;
+    });
+    convertedParts.push(text.substring(lastIndex));
+    return timestamps ? convertedParts : text;
   };
 
   return (
@@ -95,7 +139,7 @@ const CommentSection = () => {
           <textarea
             value={commentText}
             onChange={handleInputChange}
-            className="w-full min-h-14 p-2 pr-14 border-b rounded-t-lg dark:bg-slate-700"
+            className="w-full min-h-14 p-2 pr-14 border-b rounded-t-lg dark:bg-slate-700 dark:text-slate-200"
             placeholder="Write a comment..."
             // rows="1"
           ></textarea>

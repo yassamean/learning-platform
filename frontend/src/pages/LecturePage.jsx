@@ -12,11 +12,11 @@ const LecturePage = () => {
   const playerRef = useRef(null);
   const [lecture, setLecture] = useState({});
   const [watchTime, setWatchTime] = useState(0);
-  const watchTimeRef = useRef(0);
+  const watchTimeRef = useRef(0); //ref is needed because state is deleted on unmount
   const [notes, setNotes] = useState("");
-  const notesRef = useRef("");
+  const notesRef = useRef(""); //ref is needed because state is deleted on unmount
   const [highlightedText, setHighlightedText] = useState("");
-  const highlightedTextRef = useRef("");
+  const highlightedTextRef = useRef(""); //ref is needed because state is deleted on unmount
   const hasSeeked = useRef(false);
 
   useEffect(() => {
@@ -42,7 +42,6 @@ const LecturePage = () => {
           `${API_BASE_URL}/userData/${user.userDataId}/lectureData/${params.lectureId}`
         );
         const data = await response.json();
-        console.log(data);
         if (data) {
           setWatchTime(data.watchTime);
           watchTimeRef.current = data.watchTime;
@@ -127,7 +126,11 @@ const LecturePage = () => {
           ></ReactPlayer>
         </div>
         <div className="col-span-1 border rounded-lg dark:bg-slate-800 ">
-          <CommentSection></CommentSection>
+          <CommentSection
+            videoSeekTo={(watchTime) =>
+              playerRef.current.seekTo(watchTime, "seconds")
+            }
+          ></CommentSection>
         </div>
       </div>
       <div className="mt-5 grid grid-flow-row grid-cols-2 gap-5">
