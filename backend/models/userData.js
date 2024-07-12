@@ -9,7 +9,7 @@ const UserDataSchema = new Schema(
         lectureId: { type: Schema.ObjectId, ref: "Lecture", required: true },
         watchTime: { type: Number },
         notes: { type: String },
-        highlightedText: { type: String },
+        highlightedText: { type: Object },
         comments: [{ type: Schema.ObjectId, ref: "Comment" }],
       },
     ],

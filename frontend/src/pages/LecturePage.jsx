@@ -1,10 +1,11 @@
 import { API_BASE_URL } from "../config";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../context/UserContext";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import CommentSection from "../components/CommentSection";
 import ReactPlayer from "react-player";
+import PDFViewer from "../components/PdfViewer";
 
 const LecturePage = () => {
   const { user } = useAuth();
@@ -15,7 +16,7 @@ const LecturePage = () => {
   const watchTimeRef = useRef(0); //ref is needed because state is deleted on unmount
   const [notes, setNotes] = useState("");
   const notesRef = useRef(""); //ref is needed because state is deleted on unmount
-  const [highlightedText, setHighlightedText] = useState("");
+  const [highlightedText, setHighlightedText] = useState([]);
   const highlightedTextRef = useRef(""); //ref is needed because state is deleted on unmount
   const hasSeeked = useRef(false);
 
@@ -44,9 +45,8 @@ const LecturePage = () => {
         const data = await response.json();
         if (data) {
           setWatchTime(data.watchTime);
-          watchTimeRef.current = data.watchTime;
           setNotes(data.notes);
-          notesRef.current = data.notes;
+          setHighlightedText(data.highlightedText);
         }
       } catch (error) {
         console.error(error);
@@ -63,7 +63,30 @@ const LecturePage = () => {
     };
   }, []);
 
+  function debounce(func, delay) {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), delay);
+    };
+  }
+
+  const debounceSendData = useCallback(
+    debounce(updateUserDataLectureData, 3000),
+    []
+  );
+
+  useEffect(() => {
+    debounceSendData();
+    const intervalId = setInterval(() => {
+      updateUserDataLectureData();
+    }, 15000); // 15-second interval
+
+    return () => clearInterval(intervalId); // Cleanup on unmount
+  }, [watchTime, notes, highlightedText]);
+
   async function updateUserDataLectureData() {
+    console.log("now");
     try {
       const response = await fetch(
         `${API_BASE_URL}/userData/${user.userDataId}/updateLectureData`,
@@ -75,11 +98,20 @@ const LecturePage = () => {
           body: JSON.stringify({
             courseId: params.courseId.toString(),
             lectureId: params.lectureId,
-            watchTime: watchTimeRef.current,
-            notes: notesRef.current,
-            highlightedText: highlightedTextRef.current,
+            watchTime: watchTime,
+            notes: notes,
+            highlightedText: highlightedText,
           }),
         }
+      );
+      console.log(
+        JSON.stringify({
+          courseId: params.courseId.toString(),
+          lectureId: params.lectureId,
+          watchTime: watchTime,
+          notes: notes,
+          highlightedText: highlightedText,
+        })
       );
     } catch (error) {
       console.error("Error during update:", error);
@@ -112,7 +144,7 @@ const LecturePage = () => {
         <div className="p-1 col-span-2 border aspect-video rounded-lg bg-black">
           <ReactPlayer
             ref={playerRef}
-            onProgress={(state) => (watchTimeRef.current = state.playedSeconds)}
+            onProgress={(state) => setWatchTime(state.playedSeconds)}
             onReady={() => {
               if (!hasSeeked.current) {
                 playerRef.current.seekTo(watchTime, "seconds");
@@ -134,11 +166,12 @@ const LecturePage = () => {
         </div>
       </div>
       <div className="mt-5 grid grid-flow-row grid-cols-2 gap-5">
-        <div className="border rounded-lg aspect-square">
-          <iframe
-            className="w-full h-full rounded-lg"
-            src="/uploads/pdfs/example.pdf"
-          ></iframe>
+        <div className="border rounded-lg aspect-square p-1 bg-[#f0ecec] dark:bg-[#302c2c]">
+          <PDFViewer
+            pdfUrl="/uploads/pdfs/example2.pdf"
+            highlightedText={highlightedText}
+            setHighlightedText={setHighlightedText}
+          ></PDFViewer>
         </div>
         <div className="rounded-lg">
           <textarea
