@@ -187,7 +187,7 @@ function App() {
             }
           />
           <Route
-            path="/courses/:courseId/lectures/:lectureId/question/"
+            path="/courses/:courseId/lectures/:lectureId/questions/"
             element={
               <ProtectedRoute roles={["teacher"]}>
                 <CreateQuizQuestionPage />
@@ -195,7 +195,7 @@ function App() {
             }
           />
           <Route
-            path="/courses/:courseId/lectures/:lectureId/question/:questionId"
+            path="/courses/:courseId/lectures/:lectureId/questions/:questionId"
             element={
               <ProtectedRoute roles={["teacher"]}>
                 <CreateQuizQuestionPage />

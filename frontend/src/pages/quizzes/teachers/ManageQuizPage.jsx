@@ -16,7 +16,7 @@ export default function ManageQuizPage() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/question/${questionId}/delete`,
+        `${API_BASE_URL}/questions/${questionId}/delete`,
         {
           method: "POST",
         }
@@ -98,7 +98,7 @@ export default function ManageQuizPage() {
             </p>
 
             <Link
-              to={`/courses/${params.courseId}/lectures/${params.lectureId}/question/${question.id}`}
+              to={`/courses/${params.courseId}/lectures/${params.lectureId}/questions/${question.id}`}
               className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 mr-4"
             >
               Edit Question

@@ -7,8 +7,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { API_BASE_URL } from "../../../config";
 
-// TODO: Will also re-hydrate to allow for editing
-
 export default function CreateQuizQuestionPage() {
   const navigate = useNavigate();
   const params = useParams();
@@ -16,12 +14,13 @@ export default function CreateQuizQuestionPage() {
   const [lectureName, setLectureName] = useState("TODO: make call");
   const [questionText, setQuestionText] = useState("");
   const [possibleAnswers, setPossibleAnswers] = useState([
-    { text: "", isCorrect: false },
+    { answerText: "", isCorrect: false },
   ]);
   const [error, setError] = useState("");
 
   const courseId = params.courseId;
   const lectureId = params.lectureId;
+  const questionId = params.questionId;
 
   const handleQuestionTextChange = (e) => {
     setQuestionText(e.target.value);
@@ -55,6 +54,19 @@ export default function CreateQuizQuestionPage() {
     return true;
   };
 
+  useEffect(() => {
+    async function getQuestion() {
+      if (questionId) {
+        const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
+        const data = await response.json();
+        setQuestionText(data.questionText);
+        setPossibleAnswers(data.possibleAnswers);
+      }
+    }
+
+    getQuestion();
+  }, [questionId]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -70,19 +82,20 @@ export default function CreateQuizQuestionPage() {
       return;
     }
 
-    const response = await fetch(
-      `${API_BASE_URL}/courses/${courseId}/lectures/${lectureId}/question`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          questionText,
-          possibleAnswers,
-        }),
-      }
-    );
+    const url = questionId
+      ? `${API_BASE_URL}/questions/${questionId}`
+      : `${API_BASE_URL}/courses/${courseId}/lectures/${lectureId}/question`;
+
+    const response = await fetch(url, {
+      method: questionId ? "PATCH" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        questionText,
+        possibleAnswers,
+      }),
+    });
 
     // TODO: Error management
     const data = await response.json();

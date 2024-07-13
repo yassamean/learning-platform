@@ -16,4 +16,11 @@ const QuizQuestionSchema = new Schema(
   { timestamps: true }
 );
 
+QuizQuestionSchema.virtual("possibleAnswerIds").get(function () {
+  return this.possibleAnswers.map((answer) => (answer._id ? answer._id : null));
+});
+
+QuizQuestionSchema.set("toJSON", { virtuals: true });
+QuizQuestionSchema.set("toObject", { virtuals: true });
+
 export const QuizQuestion = model("QuizQuestion", QuizQuestionSchema);

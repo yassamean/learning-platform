@@ -39,19 +39,18 @@ export async function getTeacherQuizOverview(req, res) {
   }
 }
 
-export async function deleteQuestion(req, res) {
+export async function getQuestion(req, res) {
   try {
-    const questionId = req.params.questionId;
+    const question = await QuizQuestion.findById(req.params.questionId)
+      .populate({
+        path: "lectureId",
+        select: "title",
+      })
+      .populate("possibleAnswers");
 
-    const question = await QuizQuestion.findOne({ _id: questionId });
-    await QuizAnswer.deleteMany({
-      _id: { $in: question.possibleAnswers },
-    });
-    await question.deleteOne();
-
-    res.status(200).json({});
+    res.status(200).json(question);
   } catch (error) {
-    console.error("Error deleting quiz question", error);
+    console.error("Error creating quiz question", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }
@@ -76,33 +75,71 @@ export async function addQuestion(req, res) {
 
 export async function updateQuestion(req, res) {
   try {
-    const questionRecord = QuizQuestion.findById(req.params.questionId);
+    const questionRecord = await QuizQuestion.findById(req.params.questionId);
+    const existingPossibleAnswerIds = questionRecord.possibleAnswerIds;
     const updatedAnswers = req.body.possibleAnswers;
 
-    const updatedAnswerRecords = await Promise.all(
-      updatedAnswers.map(async (answer) => {
-        if (answer.id) {
-          await QuizAnswer.updateOne(
-            { _id: answer.id },
-            { answerText: answer.answerText, isCorrect: answer.isCorrect }
-          );
-        } else {
-          await QuizAnswer.create({
-            answerText: answer.answerText,
-            isCorrect: answer.isCorrect,
-          });
-        }
-      })
+    const answersToDelete = existingPossibleAnswerIds.filter(
+      (existingAnswerId) => {
+        return !updatedAnswers.some(
+          (updatedAnswer) => updatedAnswer?._id?.toString() == existingAnswerId
+        );
+      }
     );
 
-    questionRecord.update({
-      questionText: req.body.questionText,
-      possibleAnswers: updatedAnswerRecords.map((answer) => answer._id),
+    const { answersToUpdate, answersToCreate } = updatedAnswers.reduce(
+      (result, answer) => {
+        if (answer._id) {
+          result.answersToUpdate.push(answer);
+        } else {
+          result.answersToCreate.push(answer);
+        }
+        return result;
+      },
+      { answersToUpdate: [], answersToCreate: [] }
+    );
+
+    QuizAnswer.deleteMany({
+      id: { $in: answersToDelete.map((answer) => answer._id) },
     });
 
-    res.status(200).json(question);
+    const createdAnswers = await QuizAnswer.insertMany(answersToCreate, {
+      ordered: false,
+    });
+
+    for (const answerToUpdate of answersToUpdate) {
+      const { _id, ...updateFields } = answerToUpdate;
+      await QuizAnswer.updateOne({ _id }, { $set: updateFields });
+    }
+
+    await questionRecord.updateOne({
+      questionText: req.body.questionText,
+      possibleAnswers: [
+        ...answersToUpdate.map((answer) => answer._id),
+        ...createdAnswers.map((answer) => answer._id),
+      ],
+    });
+
+    res.status(200).json(questionRecord);
   } catch (error) {
     console.error("Error creating quiz question", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function deleteQuestion(req, res) {
+  try {
+    const questionId = req.params.questionId;
+
+    const question = await QuizQuestion.findOne({ _id: questionId });
+    await QuizAnswer.deleteMany({
+      _id: { $in: question.possibleAnswers },
+    });
+    await question.deleteOne();
+
+    res.status(200).json({});
+  } catch (error) {
+    console.error("Error deleting quiz question", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }
