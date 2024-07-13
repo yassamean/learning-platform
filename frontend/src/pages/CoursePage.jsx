@@ -37,7 +37,12 @@ function CoursePage() {
     }
     getCourse();
 
-    getEnrollmentStatus();
+    if (user.role === "student") {
+      getEnrollmentStatus();
+    } else {
+      setIsEnrolled(true);
+      getLectures();
+    }
   }, [isEnrolled]);
 
   async function getLectures() {
