@@ -156,7 +156,6 @@ async function getQuizListForCourseData({ user, course }) {
   let visibleLectures = lectures;
   if (user.role === "student") {
     const userData = await UserData.findOne({ userId: user._id });
-
     const watchedLectureIds = userData.lectureData.map((lecture) =>
       lecture.lectureId.toString()
     );

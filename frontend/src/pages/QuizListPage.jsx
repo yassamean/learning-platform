@@ -8,6 +8,12 @@ import { API_BASE_URL } from "../config";
 export default function QuizListPage() {
   const { user } = useAuth();
   const [quizzesInfo, setQuizzesInfo] = useState({});
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  const noQuizzesMessage =
+    user.role === "teacher"
+      ? "You don't seem to be teaching any courses, or your courses don't contain any lectures. Create a lecture so you can begin adding Quiz questions."
+      : "No quizzes available. Watch a lecture to unlock the lecture's quiz (note: some lectures may not have an accompanying quiz).";
 
   useEffect(() => {
     async function getQuizzesInfo() {
@@ -17,6 +23,7 @@ export default function QuizListPage() {
         );
         const data = await response.json();
         setQuizzesInfo(data);
+        setDataLoaded(data);
       } catch (error) {
         console.error(error);
       }
@@ -32,9 +39,11 @@ export default function QuizListPage() {
           Quizzes Overview
         </h1>
       </div>
+      {dataLoaded && Object.keys(quizzesInfo).length === 0 && (
+        <p className="mt-2">{noQuizzesMessage}</p>
+      )}
+      {!dataLoaded && <p className="mt-2">Loading quizzes...</p>}
       <ul role="list" className="flex flex-col grow gap-y-2 pt-5">
-        {Object.keys(quizzesInfo).length === 0 && <p>Loading...</p>}
-
         {quizzesInfo &&
           Object.entries(quizzesInfo).map(([courseName, info]) => (
             <div>

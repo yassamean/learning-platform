@@ -2,7 +2,11 @@ import { API_BASE_URL } from "../config";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../context/UserContext";
-import { PencilSquareIcon, ListBulletIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowUturnLeftIcon,
+  PencilSquareIcon,
+  ListBulletIcon,
+} from "@heroicons/react/24/outline";
 import CommentSection from "../components/CommentSection";
 import ReactPlayer from "react-player";
 import PDFViewer from "../components/PdfViewer";
@@ -19,6 +23,8 @@ const LecturePage = () => {
   const [highlightedText, setHighlightedText] = useState([]);
   const highlightedTextRef = useRef(""); //ref is needed because state is deleted on unmount
   const hasSeeked = useRef(false);
+
+  const courseId = params.courseId.toString();
 
   useEffect(() => {
     async function increaseViewCount() {
@@ -95,7 +101,7 @@ const LecturePage = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            courseId: params.courseId.toString(),
+            courseId: courseId,
             lectureId: params.lectureId,
             watchTime: watchTime,
             notes: notes,
@@ -105,7 +111,7 @@ const LecturePage = () => {
       );
       console.log(
         JSON.stringify({
-          courseId: params.courseId.toString(),
+          courseId: courseId,
           lectureId: params.lectureId,
           watchTime: watchTime,
           notes: notes,
@@ -127,10 +133,14 @@ const LecturePage = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-200">
             {lecture.title}
           </h1>
+          <Link to={`/courses/${courseId}/`} className="flex gap-2">
+            <ArrowUturnLeftIcon className="size-5" />
+            Back to Course Page
+          </Link>
           {user.role === "teacher" ? (
             <Link
               className="flex gap-2 place-items-center"
-              to={`/courses/${params.courseId.toString()}/lectures/${params.lectureId.toString()}/manageQuiz`}
+              to={`/courses/${courseId}/lectures/${params.lectureId.toString()}/manageQuiz`}
             >
               <ListBulletIcon className="size-8 dark:text-slate-200" />
               Manage Quiz
@@ -140,7 +150,7 @@ const LecturePage = () => {
         {["teacher", "admin"].includes(user.role) && (
           <div className="flex items-end gap-2">
             <Link
-              to={`/courses/${params.courseId.toString()}/lectures/${params.lectureId.toString()}/edit`}
+              to={`/courses/${courseId}/lectures/${params.lectureId.toString()}/edit`}
               className=""
             >
               <PencilSquareIcon className="size-8 dark:text-slate-200"></PencilSquareIcon>

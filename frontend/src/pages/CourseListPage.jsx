@@ -24,7 +24,6 @@ export default function CourseListPage({ search }) {
           `${API_BASE_URL}/courses?userId=${user.userId}`
         );
         const data = await response.json();
-        console.log(data);
         setCourses(data);
       } catch (error) {
         console.error(error);
