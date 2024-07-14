@@ -59,8 +59,6 @@ export default function QuizManagePage() {
     return;
   }, [params.id, navigate]);
 
-  console.log(quizData);
-
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg">
       {deleteQuestionFailed ? (

@@ -10,7 +10,6 @@ const CourseSchema = new Schema(
     lecturedBy: { type: Schema.ObjectId, ref: "User", required: true },
     lecturingDays: { type: Array, required: false },
     studyProgram: { type: Array, required: true },
-    isOpenToEnroll: { type: Boolean, required: true },
   },
   { timestamps: true }
 );

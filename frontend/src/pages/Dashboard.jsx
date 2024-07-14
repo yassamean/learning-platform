@@ -17,6 +17,7 @@ const tiles = [
     role: ["student"],
     buttonLink: "/quizzes",
   },
+
   {
     title: "Manage Users",
     description: "Administer user accounts and manage roles.",
@@ -47,6 +48,13 @@ const tiles = [
     buttonText: "Go to Student Management",
     role: ["teacher"],
     buttonLink: "/teacher/users",
+  },
+  {
+    title: "Manage Quizzes",
+    description: "Manage quizzes for course lectures",
+    buttonText: "Go to Quiz Management",
+    role: ["teacher"],
+    buttonLink: "/quizzes",
   },
   {
     title: "Profile Settings",

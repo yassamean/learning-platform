@@ -20,7 +20,6 @@ export default function QuizCourseListPage() {
         );
         const data = await response.json();
         setCourseQuizInfo(data);
-        console.log(data);
       } catch (error) {
         console.error(error);
       }
@@ -31,15 +30,13 @@ export default function QuizCourseListPage() {
 
   return (
     <div className="flex flex-col ">
-      <div className="pt-10 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-200">
-            Quizzes{" "}
-            {courseQuizInfo.courseName
-              ? "for '" + courseQuizInfo.courseName + "'"
-              : ""}
-          </h1>
-        </div>
+      <div className="pt-10 flex items-center">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-200">
+          Quizzes{" "}
+          {courseQuizInfo.courseName
+            ? "for '" + courseQuizInfo.courseName + "'"
+            : ""}
+        </h1>
       </div>
       <ul role="list" className="flex flex-col grow gap-y-2 pt-5">
         {courseQuizInfo?.lectureInfo?.map((lecture) => (

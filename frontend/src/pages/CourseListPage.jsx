@@ -12,11 +12,19 @@ export default function CourseListPage({ search }) {
   const { user } = useAuth();
   const [enrollments, setEnrollments] = useState([]);
 
+  const noCoursesMessage =
+    user.role === "teacher"
+      ? "You don't seem to be teaching any courses. Add a new course to begin adding material."
+      : "There are no courses available for enrollment at this time.";
+
   useEffect(() => {
     async function getCourses() {
       try {
-        const response = await fetch(`${API_BASE_URL}/courses`);
+        const response = await fetch(
+          `${API_BASE_URL}/courses?userId=${user.userId}`
+        );
         const data = await response.json();
+        console.log(data);
         setCourses(data);
       } catch (error) {
         console.error(error);
@@ -34,6 +42,7 @@ export default function CourseListPage({ search }) {
         console.error(error);
       }
     }
+
     getEnrollments();
   }, []);
 
@@ -45,7 +54,9 @@ export default function CourseListPage({ search }) {
             Available Courses
           </h1>
           <h1 className="text-lg text-gray-900 dark:text-slate-400">
-            Find a course you are interested in
+            {user.role === "student"
+              ? "Find a course you are interested in"
+              : "Manage the courses you are teaching"}
           </h1>
         </div>
         <div>
@@ -55,6 +66,9 @@ export default function CourseListPage({ search }) {
             </Link>
           )}
         </div>
+      </div>
+      <div className="pt-6 dark:text-slate-200">
+        {courses.length === 0 && <p>{noCoursesMessage}</p>}
       </div>
       <ul role="list" className="flex flex-col grow gap-y-2 pt-5">
         {courses

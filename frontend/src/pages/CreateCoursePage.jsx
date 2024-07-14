@@ -47,6 +47,16 @@ export default function CreateCoursePage() {
     "Philosophie",
   ];
 
+  const isValid = () => {
+    return (
+      form.name &&
+      form.semester &&
+      form.studyProgram &&
+      form.lecturedBy &&
+      form.isOpenToEnroll
+    );
+  };
+
   const handleRandomImage = () => {
     const randomImage = `${Math.floor(Math.random() * 16)}.svg`;
     updateForm({ image: randomImage });
@@ -104,7 +114,7 @@ export default function CreateCoursePage() {
       const courseId = params.courseId?.toString() || undefined;
       if (!courseId) {
         updateForm({
-          lecturedBy: { _id: user.userId, username: user.username },
+          lecturedBy: { _id: user.userId },
         });
         return;
       }
@@ -231,7 +241,7 @@ export default function CreateCoursePage() {
                   className="h-12 w-12 text-gray-300"
                   aria-hidden="true"
                 />
-                {form.lecturedBy?.username}
+                {user.username}
               </div>
             </div>
 
@@ -416,8 +426,9 @@ export default function CreateCoursePage() {
 
       <div className="mt-6 flex items-center justify-end gap-x-6">
         <button
+          disabled={!isValid()}
           type="submit"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 dark:text-slate-200 shadow-sm dark:hover:bg-sky-900 dark:hover:text-sky-400 hover:bg-gray-300"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-300 dark:text-slate-200 dark:hover:bg-sky-900 dark:hover:text-sky-400  disabled:cursor-not-allowed"
         >
           <FolderPlusIcon className="size-8"></FolderPlusIcon>
           Save
