@@ -13,7 +13,6 @@ import {
 export default function CreateLecturePage() {
   const navigate = useNavigate();
   const params = useParams();
-  const { user } = useAuth();
 
   const [isNew, setIsNew] = useState(true);
   const [form, setForm] = useState({

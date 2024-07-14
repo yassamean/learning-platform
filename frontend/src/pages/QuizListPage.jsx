@@ -73,6 +73,21 @@ export default function QuizListPage() {
                   </div>
                 </Link>
               ))}
+              {info?.lectureInfo?.length === 0 && user.role === "teacher" && (
+                <div className="flex flex-col gap-2">
+                  <p>
+                    This course currently has no lectures. A quiz must be
+                    associated with a lecture.
+                  </p>
+                  <Link
+                    to={`/courses/${info.courseId}/lectures/create`}
+                    key={`${quizzesInfo.courseId}-create`}
+                    className="mt-3 text-blue-500 hover:text-blue-600 "
+                  >
+                    Create Lecture for {courseName}
+                  </Link>
+                </div>
+              )}
             </div>
           ))}
       </ul>
