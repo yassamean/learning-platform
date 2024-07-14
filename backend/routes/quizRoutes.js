@@ -17,7 +17,7 @@ router.get("/quizzes/:userId", getStudentQuizzesOverview);
 // For teachers
 router.get("/questions/:questionId", getQuestion);
 router.patch("/questions/:questionId", updateQuestion);
-router.post("/courses/:courseId/lectures/:lectureId/question", addQuestion);
+router.post("/courses/:courseId/lectures/:lectureId/questions", addQuestion);
 router.post("/questions/:questionId/delete", deleteQuestion);
 
 router.get(

@@ -76,7 +76,7 @@ export default function ManageQuizPage() {
           </h2>
         </Link>
         <Link
-          to={`/courses/${params.courseId}/lectures/${params.lectureId}/question`}
+          to={`/courses/${params.courseId}/lectures/${params.lectureId}/questions`}
           className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 mb-4"
         >
           Add question

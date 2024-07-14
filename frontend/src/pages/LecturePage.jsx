@@ -2,7 +2,7 @@ import { API_BASE_URL } from "../config";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../context/UserContext";
-import { PencilSquareIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, ListBulletIcon } from "@heroicons/react/24/outline";
 import CommentSection from "../components/CommentSection";
 import ReactPlayer from "react-player";
 import PDFViewer from "../components/PdfViewer";
@@ -128,6 +128,15 @@ const LecturePage = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-200">
             {lecture.title}
           </h1>
+          {user.role === "teacher" ? (
+            <Link
+              className="flex gap-2 place-items-center"
+              to={`/courses/${params.courseId.toString()}/lectures/${params.lectureId.toString()}/manageQuiz`}
+            >
+              <ListBulletIcon className="size-8 dark:text-slate-200" />
+              Manage Quiz
+            </Link>
+          ) : null}
         </div>
         {["teacher", "admin"].includes(user.role) && (
           <div className="flex items-end gap-2">
@@ -136,11 +145,6 @@ const LecturePage = () => {
               className=""
             >
               <PencilSquareIcon className="size-8 dark:text-slate-200"></PencilSquareIcon>
-            </Link>
-            <Link
-              to={`/courses/${params.courseId.toString()}/lectures/${params.lectureId.toString()}/manageQuiz`}
-            >
-              <PlusCircleIcon className="size-8 dark:text-slate-200"></PlusCircleIcon>
             </Link>
           </div>
         )}

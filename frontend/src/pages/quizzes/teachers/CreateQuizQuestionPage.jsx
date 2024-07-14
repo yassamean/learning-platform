@@ -55,16 +55,27 @@ export default function CreateQuizQuestionPage() {
   };
 
   useEffect(() => {
-    async function getQuestion() {
-      if (questionId) {
-        const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
-        const data = await response.json();
-        setQuestionText(data.questionText);
-        setPossibleAnswers(data.possibleAnswers);
-      }
+    async function getLecture() {
+      const response = await fetch(
+        `${API_BASE_URL}/courses/${courseId}/lectures/${lectureId}`
+      );
+      const data = await response.json();
+      setLectureName(data.title);
     }
 
-    getQuestion();
+    async function getQuestion() {
+      const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
+      const data = await response.json();
+      setLectureName(data.lectureTitle);
+      setQuestionText(data.questionText);
+      setPossibleAnswers(data.possibleAnswers);
+    }
+
+    if (questionId) {
+      getQuestion();
+    } else {
+      getLecture();
+    }
   }, [questionId]);
 
   const handleSubmit = async (e) => {
@@ -84,7 +95,7 @@ export default function CreateQuizQuestionPage() {
 
     const url = questionId
       ? `${API_BASE_URL}/questions/${questionId}`
-      : `${API_BASE_URL}/courses/${courseId}/lectures/${lectureId}/question`;
+      : `${API_BASE_URL}/courses/${courseId}/lectures/${lectureId}/questions`;
 
     const response = await fetch(url, {
       method: questionId ? "PATCH" : "POST",
@@ -109,7 +120,7 @@ export default function CreateQuizQuestionPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-200">
             {params.questionId
               ? "Edit Question"
-              : `Create a new Question for Lecture ${lectureName}`}
+              : `Create a new Question for '${lectureName}'`}
           </h1>{" "}
           <div className="flex flex-col mt-10 gap-x-6 gap-y-8">
             <div className="sm:col-span-4">

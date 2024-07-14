@@ -2,7 +2,6 @@ import {
   Course,
   Lecture,
   Student,
-  QuizAnswer,
   QuizQuestion,
   QuizStudentAnswer,
   User,
@@ -41,12 +40,12 @@ export async function getTeacherQuizOverview(req, res) {
 
 export async function getQuestion(req, res) {
   try {
-    const question = await QuizQuestion.findById(req.params.questionId)
-      .populate({
-        path: "lectureId",
-        select: "title",
-      })
-      .populate("possibleAnswers");
+    const question = await QuizQuestion.findById(
+      req.params.questionId
+    ).populate({
+      path: "lectureId",
+      select: "title",
+    });
 
     res.status(200).json(question);
   } catch (error) {
@@ -58,12 +57,11 @@ export async function getQuestion(req, res) {
 export async function addQuestion(req, res) {
   try {
     const possibleAnswers = req.body.possibleAnswers;
-    const possibleAnswerRecords = await QuizAnswer.insertMany(possibleAnswers);
 
     const question = await QuizQuestion.create({
       lectureId: req.params.lectureId,
       questionText: req.body.questionText,
-      possibleAnswers: possibleAnswerRecords.map((answer) => answer._id),
+      possibleAnswers: possibleAnswers,
     });
 
     res.status(200).json(question);
@@ -76,48 +74,10 @@ export async function addQuestion(req, res) {
 export async function updateQuestion(req, res) {
   try {
     const questionRecord = await QuizQuestion.findById(req.params.questionId);
-    const existingPossibleAnswerIds = questionRecord.possibleAnswerIds;
-    const updatedAnswers = req.body.possibleAnswers;
-
-    const answersToDelete = existingPossibleAnswerIds.filter(
-      (existingAnswerId) => {
-        return !updatedAnswers.some(
-          (updatedAnswer) => updatedAnswer?._id?.toString() == existingAnswerId
-        );
-      }
-    );
-
-    const { answersToUpdate, answersToCreate } = updatedAnswers.reduce(
-      (result, answer) => {
-        if (answer._id) {
-          result.answersToUpdate.push(answer);
-        } else {
-          result.answersToCreate.push(answer);
-        }
-        return result;
-      },
-      { answersToUpdate: [], answersToCreate: [] }
-    );
-
-    QuizAnswer.deleteMany({
-      id: { $in: answersToDelete.map((answer) => answer._id) },
-    });
-
-    const createdAnswers = await QuizAnswer.insertMany(answersToCreate, {
-      ordered: false,
-    });
-
-    for (const answerToUpdate of answersToUpdate) {
-      const { _id, ...updateFields } = answerToUpdate;
-      await QuizAnswer.updateOne({ _id }, { $set: updateFields });
-    }
 
     await questionRecord.updateOne({
       questionText: req.body.questionText,
-      possibleAnswers: [
-        ...answersToUpdate.map((answer) => answer._id),
-        ...createdAnswers.map((answer) => answer._id),
-      ],
+      possibleAnswers: req.body.possibleAnswers,
     });
 
     res.status(200).json(questionRecord);
@@ -132,9 +92,6 @@ export async function deleteQuestion(req, res) {
     const questionId = req.params.questionId;
 
     const question = await QuizQuestion.findOne({ _id: questionId });
-    await QuizAnswer.deleteMany({
-      _id: { $in: question.possibleAnswers },
-    });
     await question.deleteOne();
 
     res.status(200).json({});

@@ -1,5 +1,17 @@
 import { model, Schema, Types } from "mongoose";
 
+const QuizAnswerSchema = new Schema({
+  answerText: {
+    type: String,
+    required: true,
+  },
+  isCorrect: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+});
+
 const QuizQuestionSchema = new Schema(
   {
     lectureId: {
@@ -11,16 +23,9 @@ const QuizQuestionSchema = new Schema(
       type: String,
       required: true,
     },
-    possibleAnswers: [{ type: Types.ObjectId, ref: "QuizAnswer" }],
+    possibleAnswers: [QuizAnswerSchema],
   },
   { timestamps: true }
 );
-
-QuizQuestionSchema.virtual("possibleAnswerIds").get(function () {
-  return this.possibleAnswers.map((answer) => (answer._id ? answer._id : null));
-});
-
-QuizQuestionSchema.set("toJSON", { virtuals: true });
-QuizQuestionSchema.set("toObject", { virtuals: true });
 
 export const QuizQuestion = model("QuizQuestion", QuizQuestionSchema);
