@@ -133,10 +133,7 @@ const LecturePage = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-200">
             {lecture.title}
           </h1>
-          <Link to={`/courses/${courseId}/`} className="flex gap-2">
-            <ArrowUturnLeftIcon className="size-5" />
-            Back to Course Page
-          </Link>
+
           {user.role === "teacher" ? (
             <Link
               className="flex gap-2 place-items-center"
@@ -146,6 +143,10 @@ const LecturePage = () => {
               Manage Quiz
             </Link>
           ) : null}
+          <Link to={`/courses/${courseId}/`} className="flex gap-2">
+            <ArrowUturnLeftIcon className="size-5" />
+            Back to Course Page
+          </Link>
         </div>
         {["teacher", "admin"].includes(user.role) && (
           <div className="flex items-end gap-2">

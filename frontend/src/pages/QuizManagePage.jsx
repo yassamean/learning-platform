@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { useAuth } from "../context/UserContext";
+import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline";
 import { API_BASE_URL } from "../config";
 
 export default function QuizManagePage() {
@@ -10,6 +10,8 @@ export default function QuizManagePage() {
   const params = useParams();
   const [deleteQuestionFailed, setDeleteQuestionFailed] = useState(false);
   const [quizData, setQuizData] = useState({});
+
+  const courseId = params.courseId;
 
   const deleteQuestion = async (questionId) => {
     setDeleteQuestionFailed(false);
@@ -43,7 +45,7 @@ export default function QuizManagePage() {
     async function fetchQuizData() {
       const lectureId = params.lectureId;
       const response = await fetch(
-        `${API_BASE_URL}/courses/${params.courseId}/lectures/${lectureId}/manageQuiz`
+        `${API_BASE_URL}/courses/${courseId}/lectures/${lectureId}/manageQuiz`
       );
       if (!response.ok) {
         const message = `An error has occurred: ${response.statusText}`;
@@ -110,6 +112,10 @@ export default function QuizManagePage() {
           </li>
         ))}
       </ul>
+      <Link to={`/courses/${courseId}/quizzes`} className=" flex mt-4 gap-3">
+        <ArrowUturnLeftIcon className="size-5" />
+        Back to Quizzes Page
+      </Link>
     </div>
   );
 }
