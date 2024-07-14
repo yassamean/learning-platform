@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { useAuth } from "../../../context/UserContext";
-import { API_BASE_URL } from "../../../config";
+import { useAuth } from "../context/UserContext";
+import { API_BASE_URL } from "../config";
 
-export default function ManageQuizPage() {
+export default function QuizManagePage() {
   const navigate = useNavigate();
   const params = useParams();
   const [deleteQuestionFailed, setDeleteQuestionFailed] = useState(false);

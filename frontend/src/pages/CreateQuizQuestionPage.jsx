@@ -5,7 +5,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { API_BASE_URL } from "../../../config";
+import { API_BASE_URL } from "../config";
 
 export default function CreateQuizQuestionPage() {
   const navigate = useNavigate();

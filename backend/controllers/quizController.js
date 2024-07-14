@@ -1,10 +1,9 @@
 import {
   Course,
   Lecture,
-  Student,
   QuizQuestion,
-  QuizStudentAnswer,
   User,
+  UserData,
 } from "../models/index.js";
 
 export async function getQuizListForCourse(req, res) {
@@ -13,40 +12,37 @@ export async function getQuizListForCourse(req, res) {
 
   try {
     const user = await User.findById(userId);
+    const course = await Course.findById(courseId);
+    const lectures = await Lecture.find({ courseId }).populate("questionCount");
 
-    const response =
-      user.role === "student"
-        ? await getStudentQuizListForCourse({ courseId })
-        : await getTeacherQuizListForCourse({ courseId });
+    let visibleLectures = lectures;
+    if (user.role === "student") {
+      const userData = await UserData.findOne({ userId: userId });
 
-    res.status(200).json(response);
+      const watchedLectureIds = userData.lectureData.map((lecture) =>
+        lecture.lectureId.toString()
+      );
+
+      visibleLectures = lectures.filter(
+        (lecture) =>
+          watchedLectureIds.includes(lecture._id.toString()) &&
+          lecture.questionCount > 0
+      );
+    }
+
+    res.status(200).json({
+      courseId,
+      courseName: course.name,
+      lectureInfo: visibleLectures.map((lecture) => ({
+        id: lecture._id,
+        title: lecture.title,
+        numQuestions: lecture.questionCount,
+      })),
+    });
   } catch (error) {
     console.error(`Error getting quiz list for course ${courseId}`, error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
-
-async function getStudentQuizListForCourse({ courseId }) {
-  const course = await Course.findById(courseId);
-  const lectures = await Lecture.find({ courseId }).populate("questionCount");
-
-  // TODO
-  return {};
-}
-
-async function getTeacherQuizListForCourse({ courseId }) {
-  const course = await Course.findById(courseId);
-  const lectures = await Lecture.find({ courseId }).populate("questionCount");
-
-  return {
-    courseId,
-    courseName: course.name,
-    lectureInfo: lectures.map((lecture) => ({
-      id: lecture._id,
-      title: lecture.title,
-      numQuestions: lecture.questionCount,
-    })),
-  };
 }
 
 export async function getTeacherQuizOverview(req, res) {
@@ -142,151 +138,3 @@ export async function deleteQuestion(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
-
-export async function getStudentQuizzesOverview(req, res) {
-  try {
-    const userId = req.params.userId;
-
-    const courses = await Course.find({});
-    const quizOverviewData = await Promise.all(
-      courses.map(async (course) =>
-        getQuizInfoForCourse({ userId, courseId: course._id })
-      )
-    );
-
-    res.status(200).json(quizOverviewData);
-  } catch (error) {
-    console.error("Error fetching quiz overview data:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-}
-
-// -------------------------------
-// ----------- HELPERS -----------
-// -------------------------------
-
-async function getQuizInfoForCourse({ courseId, userId }) {
-  const course = await Course.findById(courseId);
-  const student = await Student.findOne({ userId });
-
-  return {
-    courseId: courseId,
-    courseName: course.name,
-    lectureQuizzes: getQuizInfoForVisibleLectures({
-      student,
-    }),
-  };
-}
-
-async function getQuizInfoForVisibleLectures({ student }) {
-  const lectures = await Lecture.find({
-    _id: { $in: student.lecturesViewed },
-  }).sort({
-    title: 1,
-  });
-
-  lectures.reduce((res, lecture) => {
-    res[lecture._id] = {
-      lectureTitle: lecture.title,
-      ...getStudentQuizInfoForLecture({
-        student,
-        lecture,
-      }),
-    };
-  }, {});
-}
-
-async function getStudentQuizInfoForLecture({ student, lecture }) {
-  const questions = await QuizQuestion.find({ lectureId: lecture._id });
-  const answers = await QuizStudentAnswer.find({
-    studentId: student._id,
-    lectureId: lecture._id,
-  });
-
-  const numQuestions = questions.length;
-
-  // TODO: When we do Spaced Repetition Algorithm,
-  // there will be more than one correct Answer per question
-  const numAnsweredCorrectly = answers.reduce(
-    (res, answer) => (answer.answeredCorrectly ? res + 1 : res),
-    0
-  );
-
-  // TODO: Actually implement this
-  // const nextQuestion = nextUnansweredQuestion({ questions, answers });
-
-  return {
-    lectureId: lecture._id,
-    lectureName: lecture.title,
-    numQuestions,
-    numAnsweredCorrectly,
-    // nextQuestion:
-    //   includeNextQuestion && nextQuestion
-    //     ? {
-    //         questionText: nextQuestion.questionText,
-    //         possibleAnswers: nextQuestion.possibleAnswers,
-    //       }
-    //     : null,
-  };
-}
-
-export async function getQuizInfoForLecture(req, res) {
-  try {
-    const userId = req.params.userId;
-    const lectureId = req.params.lectureId;
-
-    const user = await User.findById({ user });
-    const lecture = await Lecture.findById(lectureId);
-
-    let quizData = null;
-    if (user.role === "teacher") {
-      const QuizQuestions = await QuizQuestion.find({
-        lectureId: lecture._id,
-      });
-
-      quizData = {
-        lectureId: lecture._id,
-        lectureName: lecture.title,
-        QuizQuestions,
-      };
-    } else {
-      const student = await Student.find({ userId });
-      quizData = await getStudentQuizInfoForLecture({
-        student,
-        lecture,
-        includeNextQuestion: true,
-      });
-    }
-
-    res.status(200).json(quizData);
-  } catch (error) {
-    console.error("Error fetching quiz data for lecture:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-}
-
-export async function createQuiz(req, res) {
-  try {
-  } catch (error) {}
-}
-
-export async function updateQuiz(req, res) {
-  try {
-  } catch (error) {}
-}
-
-// function nextUnansweredQuestion({ questions, answers }) {
-//   questions.forEach((question) => {
-//     const correctAnswers = answers.select(
-//       (answer) =>
-//         answer.QuizQuestionId === question._id &&
-//         answer.answeredCorrectly === true
-//     );
-
-//     if (correctAnswers.length === 0) {
-//       return question;
-//     }
-//   });
-
-//   return null;
-// }

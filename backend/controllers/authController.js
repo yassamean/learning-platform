@@ -5,7 +5,7 @@ import {
   RECAPTCHA_SECRET_KEY,
   BASE_URL_FOR_EMAIL,
 } from "../utils/config.js";
-import { Student, User } from "../models/index.js";
+import { User } from "../models/index.js";
 import { sendEmail } from "../utils/email.js";
 
 export async function login(req, res) {
@@ -102,10 +102,6 @@ export async function register(req, res) {
     });
 
     const result = await user.save();
-
-    if (user.role === "student") {
-      await new Student({ userId: user._id }).save();
-    }
 
     const token = jwt.sign(
       {

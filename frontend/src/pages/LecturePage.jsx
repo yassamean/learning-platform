@@ -147,6 +147,17 @@ const LecturePage = () => {
             </Link>
           </div>
         )}
+        {["student"].includes(user.role) && (
+          <div className="flex items-end gap-2">
+            <Link
+              to={`/courses/${params.courseId}/lectures/${params.lectureId}/quiz`}
+              className="flex flex-col mr-2 place-items-center gap-1"
+            >
+              <PencilSquareIcon className="size-8 dark:text-slate-200"></PencilSquareIcon>
+              <span>Lecture Quiz</span>
+            </Link>
+          </div>
+        )}
       </div>
       <div className="mt-10 grid grid-flow-row grid-cols-3 gap-5">
         <div className="p-1 col-span-2 border aspect-video rounded-lg bg-black">

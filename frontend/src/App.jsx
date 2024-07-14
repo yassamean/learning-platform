@@ -26,10 +26,10 @@ import LectureListPage from "./pages/LectureListPage";
 import LecturePage from "./pages/LecturePage";
 import CreateLecturePage from "./pages/CreateLecturePage";
 
-import CreateQuizQuestionPage from "./pages/quizzes/teachers/CreateQuizQuestionPage";
-import StudentQuizOverviewPage from "./pages/quizzes/students/StudentQuizOverviewPage";
-import ManageQuizPage from "./pages/quizzes/teachers/ManageQuizPage";
-import CourseQuizListPage from "./pages/CourseQuizListPage";
+import CreateQuizQuestionPage from "./pages/CreateQuizQuestionPage";
+import QuizManagePage from "./pages/QuizManagePage";
+import QuizCourseListPage from "./pages/QuizCourseListPage";
+import QuizPage from "./pages/QuizPage";
 
 function App() {
   const [search, setSearch] = useState("");
@@ -171,19 +171,20 @@ function App() {
           />
           {/* -------------------------------------  */}
           {/* Quizzes  */}
-          <Route
-            path="/quizzes"
-            element={
-              <ProtectedRoute roles={["student"]}>
-                <StudentQuizOverviewPage />
-              </ProtectedRoute>
-            }
-          />
+
           <Route
             path="/courses/:courseId/quizzes"
             element={
               <ProtectedRoute roles={["student", "teacher"]}>
-                <CourseQuizListPage />
+                <QuizCourseListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/:courseId/lectures/:lectureId/quiz"
+            element={
+              <ProtectedRoute roles={["student"]}>
+                <QuizPage />
               </ProtectedRoute>
             }
           />
@@ -191,7 +192,7 @@ function App() {
             path="/courses/:courseId/lectures/:lectureId/manageQuiz"
             element={
               <ProtectedRoute roles={["teacher"]}>
-                <ManageQuizPage />
+                <QuizManagePage />
               </ProtectedRoute>
             }
           />

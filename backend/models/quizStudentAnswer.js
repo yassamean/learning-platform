@@ -15,7 +15,7 @@ const QuizStudentAnswerSchema = new Schema(
     studentId: {
       type: Types.ObjectId,
       required: true,
-      ref: "Student",
+      ref: "User",
     },
     answeredCorrectly: {
       type: Boolean,

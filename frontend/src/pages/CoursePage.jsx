@@ -124,13 +124,13 @@ function CoursePage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-200">
             {course.name}
           </h1>
-          {["teacher", "student"].includes(user.role) ? (
+          {["teacher"].includes(user.role) ? (
             <Link
               className="flex gap-2 place-items-center mt-2"
               to={`/courses/${courseId}/quizzes`}
             >
               <ListBulletIcon className="size-6 dark:text-slate-200" />
-              {user.role === "student" ? "See Quizzes" : "Manage Quizzes"}
+              Manage Quizzes
             </Link>
           ) : null}
         </div>
@@ -203,7 +203,10 @@ function CoursePage() {
                 <PuzzlePieceIcon className="h-6 w-6" />
                 <div className="">
                   Quizpage:{" "}
-                  <Link to="/" className="font-bold text-blue-600">
+                  <Link
+                    className="font-bold text-blue-600"
+                    to={`/courses/${courseId}/quizzes`}
+                  >
                     Link
                   </Link>
                 </div>

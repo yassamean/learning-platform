@@ -90,7 +90,7 @@ export default function CreateLecturePage() {
     } catch (error) {
       console.error("A problem occurred with your fetch operation: ", error);
     } finally {
-      navigate("/courses");
+      navigate(`/courses/${params.courseId}`);
     }
   }
 
