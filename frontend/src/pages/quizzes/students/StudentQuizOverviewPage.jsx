@@ -35,7 +35,7 @@ export default function StudentQuizOverviewPage() {
           </h1>
         </div>
       </div>
-      <ul role="list" className="flex flex-col grow gap-y-2 pt-5">
+      {/* <ul role="list" className="flex flex-col grow gap-y-2 pt-5">
         {quizOverview.map(({ courseId, courseName, lectureQuizzes }) => (
           <div key={courseId}>
             <h2 className="text-xl">{courseName}</h2>
@@ -50,7 +50,7 @@ export default function StudentQuizOverviewPage() {
             ))}
           </div>
         ))}
-      </ul>
+      </ul> */}
     </div>
   );
 }

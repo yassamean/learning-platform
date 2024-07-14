@@ -11,7 +11,7 @@ export default function CreateQuizQuestionPage() {
   const navigate = useNavigate();
   const params = useParams();
 
-  const [lectureName, setLectureName] = useState("TODO: make call");
+  const [lectureName, setLectureName] = useState("");
   const [questionText, setQuestionText] = useState("");
   const [possibleAnswers, setPossibleAnswers] = useState([
     { answerText: "", isCorrect: false },
@@ -120,7 +120,9 @@ export default function CreateQuizQuestionPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-200">
             {params.questionId
               ? "Edit Question"
-              : `Create a new Question for '${lectureName}'`}
+              : `Create a new Question ${
+                  lectureName ? "for '" + lectureName + "'" : ""
+                }`}
           </h1>{" "}
           <div className="flex flex-col mt-10 gap-x-6 gap-y-8">
             <div className="sm:col-span-4">

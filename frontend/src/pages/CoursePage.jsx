@@ -5,6 +5,7 @@ import {
   AtSymbolIcon,
   BookOpenIcon,
   CalendarDaysIcon,
+  ListBulletIcon,
   PencilSquareIcon,
   PlusCircleIcon,
   PuzzlePieceIcon,
@@ -23,12 +24,12 @@ function CoursePage() {
   const [lectures, setLectures] = useState([]);
   const [isEnrolled, setIsEnrolled] = useState(false);
 
+  const courseId = params.courseId.toString();
+
   useEffect(() => {
     async function getCourse() {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/courses/${params.courseId.toString()}`
-        );
+        const response = await fetch(`${API_BASE_URL}/courses/${courseId}`);
         const data = await response.json();
         setCourse(data);
       } catch (error) {
@@ -48,7 +49,7 @@ function CoursePage() {
   async function getLectures() {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/courses/${params.courseId.toString()}/lectures`
+        `${API_BASE_URL}/courses/${courseId}/lectures`
       );
       const data = await response.json();
       setLectures(data);
@@ -63,7 +64,7 @@ function CoursePage() {
         `${API_BASE_URL}/userData/${user.userDataId}/enrollments`
       );
       const data = await response.json();
-      if (data.enrollments?.includes(params.courseId)) {
+      if (data.enrollments?.includes(courseId)) {
         setIsEnrolled(true);
         getLectures();
       }
@@ -81,11 +82,11 @@ function CoursePage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ courseId: params.courseId.toString() }),
+          body: JSON.stringify({ courseId }),
         }
       );
       const data = await response.json();
-      if (data.enrollments.includes(params.courseId)) {
+      if (data.enrollments.includes(courseId)) {
         setIsEnrolled(true);
         getLectures();
       }
@@ -103,7 +104,7 @@ function CoursePage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ courseId: params.courseId.toString() }),
+          body: JSON.stringify({ courseId }),
         }
       );
       const data = await response.json();
@@ -123,19 +124,23 @@ function CoursePage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-200">
             {course.name}
           </h1>
+          {["teacher", "student"].includes(user.role) ? (
+            <Link
+              className="flex gap-2 place-items-center mt-2"
+              to={`/courses/${courseId}/quizzes`}
+            >
+              <ListBulletIcon className="size-6 dark:text-slate-200" />
+              {user.role === "student" ? "See Quizzes" : "Manage Quizzes"}
+            </Link>
+          ) : null}
         </div>
         <div className="flex items-end gap-2">
           {["teacher", "admin"].includes(user.role) && (
             <>
-              <Link
-                to={`/courses/${params.courseId.toString()}/edit`}
-                className=""
-              >
+              <Link to={`/courses/${courseId}/edit`} className="">
                 <PencilSquareIcon className="size-8 dark:text-slate-200"></PencilSquareIcon>
               </Link>
-              <Link
-                to={`/courses/${params.courseId.toString()}/lectures/create`}
-              >
+              <Link to={`/courses/${courseId}/lectures/create`}>
                 <PlusCircleIcon className="size-8 dark:text-slate-200"></PlusCircleIcon>
               </Link>
             </>
@@ -158,9 +163,7 @@ function CoursePage() {
             </div>
             {lectures.at(0) && (
               <VideoCard
-                path={`/courses/${params.courseId.toString()}/lectures/${
-                  lectures.at(0)._id
-                }
+                path={`/courses/${courseId}/lectures/${lectures.at(0)._id}
               `}
                 data={lectures.at(0)}
               ></VideoCard>
@@ -239,9 +242,7 @@ function CoursePage() {
           {lectures.map((lecture) => (
             <VideoCard
               key={lecture._id}
-              path={`/courses/${params.courseId.toString()}/lectures/${
-                lecture._id
-              }
+              path={`/courses/${courseId}/lectures/${lecture._id}
           `}
               data={lecture}
             ></VideoCard>

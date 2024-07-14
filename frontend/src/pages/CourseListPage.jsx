@@ -85,7 +85,7 @@ export default function CourseListPage({ search }) {
                   <p className="text-sm leading-6 text-gray-900 dark:text-slate-400">
                     Updated {new Date(course.updatedAt).toLocaleString()}
                   </p>
-                  {enrollments.includes(course._id) ? (
+                  {enrollments?.includes(course._id) ? (
                     <div className="mt-1 flex items-center gap-x-1.5">
                       <div className="flex-none rounded-full bg-sky-500/20 p-1">
                         <div className="h-1.5 w-1.5 rounded-full bg-sky-500" />

@@ -86,7 +86,6 @@ const LecturePage = () => {
   }, [watchTime, notes, highlightedText]);
 
   async function updateUserDataLectureData() {
-    console.log("now");
     try {
       const response = await fetch(
         `${API_BASE_URL}/userData/${user.userDataId}/updateLectureData`,

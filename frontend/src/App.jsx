@@ -29,6 +29,7 @@ import CreateLecturePage from "./pages/CreateLecturePage";
 import CreateQuizQuestionPage from "./pages/quizzes/teachers/CreateQuizQuestionPage";
 import StudentQuizOverviewPage from "./pages/quizzes/students/StudentQuizOverviewPage";
 import ManageQuizPage from "./pages/quizzes/teachers/ManageQuizPage";
+import CourseQuizListPage from "./pages/CourseQuizListPage";
 
 function App() {
   const [search, setSearch] = useState("");
@@ -175,6 +176,14 @@ function App() {
             element={
               <ProtectedRoute roles={["student"]}>
                 <StudentQuizOverviewPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses/:courseId/quizzes"
+            element={
+              <ProtectedRoute roles={["student", "teacher"]}>
+                <CourseQuizListPage />
               </ProtectedRoute>
             }
           />

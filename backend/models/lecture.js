@@ -13,4 +13,14 @@ const LectureSchema = new Schema(
   { timestamps: true }
 );
 
+LectureSchema.virtual("questionCount", {
+  ref: "QuizQuestion",
+  localField: "_id",
+  foreignField: "lectureId",
+  count: true,
+});
+
+LectureSchema.set("toJSON", { virtuals: true });
+LectureSchema.set("toObject", { virtuals: true });
+
 export const Lecture = model("Lecture", LectureSchema);

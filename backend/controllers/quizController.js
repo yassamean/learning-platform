@@ -7,6 +7,48 @@ import {
   User,
 } from "../models/index.js";
 
+export async function getQuizListForCourse(req, res) {
+  const courseId = req.params.courseId;
+  const userId = req.query.userId;
+
+  try {
+    const user = await User.findById(userId);
+
+    const response =
+      user.role === "student"
+        ? await getStudentQuizListForCourse({ courseId })
+        : await getTeacherQuizListForCourse({ courseId });
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(`Error getting quiz list for course ${courseId}`, error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+async function getStudentQuizListForCourse({ courseId }) {
+  const course = await Course.findById(courseId);
+  const lectures = await Lecture.find({ courseId }).populate("questionCount");
+
+  // TODO
+  return {};
+}
+
+async function getTeacherQuizListForCourse({ courseId }) {
+  const course = await Course.findById(courseId);
+  const lectures = await Lecture.find({ courseId }).populate("questionCount");
+
+  return {
+    courseId,
+    courseName: course.name,
+    lectureInfo: lectures.map((lecture) => ({
+      id: lecture._id,
+      title: lecture.title,
+      numQuestions: lecture.questionCount,
+    })),
+  };
+}
+
 export async function getTeacherQuizOverview(req, res) {
   try {
     const lectureId = req.params.lectureId;
@@ -154,11 +196,7 @@ async function getQuizInfoForVisibleLectures({ student }) {
   }, {});
 }
 
-async function getStudentQuizInfoForLecture({
-  student,
-  lecture,
-  includeNextQuestion = false,
-}) {
+async function getStudentQuizInfoForLecture({ student, lecture }) {
   const questions = await QuizQuestion.find({ lectureId: lecture._id });
   const answers = await QuizStudentAnswer.find({
     studentId: student._id,
@@ -237,18 +275,6 @@ export async function updateQuiz(req, res) {
   } catch (error) {}
 }
 
-// async function getTeacherQuizInfoForCourse({ courseId }) {
-//   const course = await Course.findById(courseId);
-//   return {
-//     courseId: courseId,
-//     courseTitle: course.title,
-//     lectureQuizzes: getStudentQuizInfoForLecture({
-//       student,
-//       includeNextQuestion: false,
-//     }),
-//   };
-// }
-
 // function nextUnansweredQuestion({ questions, answers }) {
 //   questions.forEach((question) => {
 //     const correctAnswers = answers.select(
@@ -264,16 +290,3 @@ export async function updateQuiz(req, res) {
 
 //   return null;
 // }
-
-export async function getQuizzesForCourse(req, res) {
-  try {
-    const userId = req.params.userId;
-    const courseId = req.params.courseId;
-
-    const courseQuizData = await getQuizInfoForCourse({ courseId, userId });
-    res.status(200).json(courseQuizData);
-  } catch (error) {
-    console.error("Error fetching quiz data for course:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-}
