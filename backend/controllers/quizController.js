@@ -7,6 +7,10 @@ import {
   UserData,
 } from "../models/index.js";
 
+const NEW_QUESTION = "NEW QUESTION";
+const REVIEW_QUESTION = "REVIEW";
+const REPEAT_QUESTION = "REPEAT";
+
 export async function getQuizList(req, res) {
   try {
     const userId = req.query.userId;
@@ -184,12 +188,17 @@ export async function nextQuizQuestion(req, res) {
   const studentId = req.query.userId;
 
   try {
-    const nextQuestion = await getNextQuizQuestion({ lectureId, studentId });
+    const [questionType, nextQuestion, lastShown] = await getNextQuizQuestion({
+      lectureId,
+      studentId,
+    });
 
     // We don't want to send the correct answer info along
     // in case the student knows how to read network calls :)
     res.status(200).json({
       ...nextQuestion.toJSON(),
+      questionType,
+      lastShown,
       possibleAnswers: nextQuestion.possibleAnswers.map(
         (answer) => answer.answerText
       ),
@@ -246,25 +255,26 @@ async function getNextQuizQuestion({ lectureId, studentId }) {
     studentId,
   });
 
-  // { questionId: [Timestamp || null] }
-  // If there is a timestamp, the question has been answered correctly before and
-  // the time represents the most recent correct answer.
-  // If there is no timestamp, it means the question has been answered before
-  // but it was answered incorrectly.
-  const mostRecentCorrectAnswers = allStudentAnswers.reduce(
+  // { questionId: { correct: [Timestamp], incorrect: [Timestamp] } }
+  const mostRecentAnswers = allStudentAnswers.reduce(
     (result, studentAnswer) => {
       const questionId = studentAnswer.questionId.toString();
-      const previousCorrectAnswerTime = result[questionId];
+      const prevAnswerData = result[questionId];
 
-      if (studentAnswer.answeredCorrectly && previousCorrectAnswerTime) {
-        result[questionId] =
-          studentAnswer.createdAt > previousCorrectAnswerTime
-            ? studentAnswer.createdAt
-            : previousCorrectAnswerTime;
-      } else if (studentAnswer.answeredCorrectly) {
-        result[questionId] = studentAnswer.createdAt;
+      result[questionId] = prevAnswerData
+        ? prevAnswerData
+        : { correct: [], incorrect: [] };
+
+      if (studentAnswer.answeredCorrectly) {
+        result[questionId].correct = [
+          ...result[questionId].correct,
+          studentAnswer.createdAt,
+        ];
       } else {
-        result[questionId] = null;
+        result[questionId].incorrect = [
+          ...result[questionId].incorrect,
+          studentAnswer.createdAt,
+        ];
       }
 
       return result;
@@ -280,43 +290,83 @@ async function getNextQuizQuestion({ lectureId, studentId }) {
   // If there are any, return the earliest-created question.
   const unansweredQuestions = allQuestions
     .filter((question) => {
-      const answeredQuestionIds = Object.keys(mostRecentCorrectAnswers);
+      const answeredQuestionIds = Object.keys(mostRecentAnswers);
       return !answeredQuestionIds.includes(question._id.toString());
     })
     .toSorted(sortQuestionByCreatedAt);
 
   if (unansweredQuestions.length > 0) {
-    return unansweredQuestions[0];
+    return [NEW_QUESTION, unansweredQuestions[0], null];
   }
 
   // 2. If all questions have been answered,
-  // return a question that the student has answered but never gotten right.
-  const questionNeverAnsweredCorrectly = Object.entries(
-    mostRecentCorrectAnswers
-  ).find(([_, timestamp]) => timestamp == null);
+  // return a question that the student has answered but never gotten right.'
+  const questionsNeverAnsweredCorrectly = Object.entries(
+    mostRecentAnswers
+  ).filter(([_, { correct }]) => correct.length === 0);
 
-  if (questionNeverAnsweredCorrectly) {
-    return allQuestions.find(
-      (question) =>
-        question._id.toString() === questionNeverAnsweredCorrectly[0]
-    );
+  if (questionsNeverAnsweredCorrectly.length !== 0) {
+    const { earliestQuestion, lastShown } =
+      questionsNeverAnsweredCorrectly.reduce(
+        (result, [questionId, { incorrect }]) => {
+          const sortedIncorrectTimes = incorrect.toSorted();
+          if (
+            !result.earliestQuestion ||
+            sortedIncorrectTimes[incorrect.length - 1] < result.lastShown
+          ) {
+            result.earliestQuestion = questionId;
+            result.lastShown = sortedIncorrectTimes[incorrect.length - 1];
+          }
+
+          return result;
+        },
+        {}
+      );
+
+    return [
+      REVIEW_QUESTION,
+      allQuestions.find(
+        (question) => question._id.toString() === earliestQuestion
+      ),
+      lastShown,
+    ];
   }
 
   // 3. If user has answered all questions right,
   // return the question that was answered correctly the longest time ago.
-  const questionsAnsweredCorrectly = Object.entries(mostRecentCorrectAnswers)
-    .filter(([_, timestamp]) => timestamp)
-    .toSorted(sortByTimestamp);
+  const questionsAnsweredCorrectly = Object.entries(mostRecentAnswers).filter(
+    ([_, { correct }]) => correct.length !== 0
+  );
 
-  if (questionsAnsweredCorrectly) {
-    return allQuestions.find(
-      (question) => question._id.toString() === questionsAnsweredCorrectly[0][0]
+  if (questionsAnsweredCorrectly.length !== 0) {
+    const { earliestQuestion, lastShown } = questionsAnsweredCorrectly.reduce(
+      (result, [questionId, { correct }]) => {
+        const sortedCorrectTimes = correct.toSorted();
+        if (
+          !result.earliestQuestion ||
+          sortedCorrectTimes[correct.length - 1] < result.lastShown
+        ) {
+          result.earliestQuestion = questionId;
+          result.lastShown = sortedCorrectTimes[correct.length - 1];
+        }
+
+        return result;
+      },
+      {}
     );
+
+    return [
+      REPEAT_QUESTION,
+      allQuestions.find(
+        (question) => question._id.toString() === earliestQuestion
+      ),
+      lastShown,
+    ];
   }
 
   // 4. If we still haven't found anything, something has gone terribly wrong
   // but we'll just return the first question that exists
-  return allQuestions[0];
+  return [NEW_QUESTION, allQuestions[0], null];
 }
 
 function sortQuestionByCreatedAt(questionA, questionB) {
@@ -329,6 +379,7 @@ function sortQuestionByCreatedAt(questionA, questionB) {
   return 0;
 }
 
+// [[questionId, { correct:, incorrect: }]]
 function sortByTimestamp([_questionA, timestampA], [_questionB, timestampB]) {
   if (timestampA < timestampB) {
     return -1;

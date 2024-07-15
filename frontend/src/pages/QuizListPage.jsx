@@ -22,7 +22,6 @@ export default function QuizListPage() {
           `${API_BASE_URL}/quizzes?userId=${user.userId}`
         );
         const data = await response.json();
-        console.log(data);
         setQuizzesInfo(data);
         setDataLoaded(true);
       } catch (error) {

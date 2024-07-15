@@ -21,6 +21,17 @@ export default function QuizPage() {
   const [showingAnswer, setShowingAnswer] = useState(false);
   const [lastQuestionResult, setLastQuestionResult] = useState(null);
 
+  const questionTypeStyling = (questionType) => {
+    switch (questionType) {
+      case "REVIEW":
+        return "border-red-500 bg-red-500";
+      case "REPEAT":
+        return "border-green-500 bg-green-500";
+    }
+
+    return "border border-gray-400 bg-gray-400";
+  };
+
   const answerColorClasses = (answer) => {
     // During answer selection
     if (!showingAnswer) {
@@ -56,7 +67,6 @@ export default function QuizPage() {
         `${API_BASE_URL}/courses/${courseId}/lectures/${lectureId}/nextQuestion?userId=${user.userId}`
       );
       const data = await response.json();
-      console.log(data);
       setQuestionData(data);
       setLectureName(data.lectureId.title);
     } catch (error) {
@@ -92,39 +102,59 @@ export default function QuizPage() {
         <h1 className="text-3xl font-semibold text-center mb-3">
           {lectureName}
         </h1>
-        <h2 className="text-2xl font-semibold text-center mb-3">
-          {questionData?.questionText}
-        </h2>
 
-        {questionData?.possibleAnswers?.map((answer) => (
-          <div
-            onClick={() => (showingAnswer ? null : setSelectedAnswer(answer))}
-            className={`rounded-lg border-2 text-center w-40 p-4 hover:border-blue-500 ${
-              showingAnswer ? "" : "hover:cursor-pointer"
-            } ${answerColorClasses(answer)}`}
-          >
-            <span className="text-lg">{answer}</span>
-          </div>
-        ))}
+        {questionData && (
+          <>
+            <div
+              className={`rounded-lg w-fit text-white ${questionTypeStyling(
+                questionData.questionType
+              )}`}
+            >
+              <p className="p-2 text-xs">{questionData.questionType}</p>
+            </div>
 
-        {questionData && !showingAnswer && (
-          <button
-            type="button"
-            className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 hover:cursor-pointer disabled:bg-blue-600 disabled:cursor-not-allowed"
-            onClick={() => handleSubmitAnswer()}
-            disabled={!selectedAnswer}
-          >
-            Submit
-          </button>
-        )}
-        {questionData && showingAnswer && (
-          <button
-            type="button"
-            className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 hover:cursor-pointer disabled:bg-blue-600 disabled:cursor-not-allowed"
-            onClick={() => getNextQuestion()}
-          >
-            Next
-          </button>
+            <h2 className="text-2xl font-semibold text-center mb-3">
+              {questionData.questionText}
+            </h2>
+            {questionData.possibleAnswers?.map((answer) => (
+              <div
+                onClick={() =>
+                  showingAnswer ? null : setSelectedAnswer(answer)
+                }
+                className={`rounded-lg border-2 text-center w-40 p-4 hover:border-blue-500 ${
+                  showingAnswer ? "" : "hover:cursor-pointer"
+                } ${answerColorClasses(answer)}`}
+              >
+                <span className="text-lg">{answer}</span>
+              </div>
+            ))}
+
+            {!showingAnswer && (
+              <button
+                type="button"
+                className="inline-block mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 hover:cursor-pointer disabled:bg-blue-600 disabled:cursor-not-allowed"
+                onClick={() => handleSubmitAnswer()}
+                disabled={!selectedAnswer}
+              >
+                Submit
+              </button>
+            )}
+
+            {showingAnswer && (
+              <button
+                type="button"
+                className="inline-block mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 hover:cursor-pointer disabled:bg-blue-600 disabled:cursor-not-allowed"
+                onClick={() => getNextQuestion()}
+              >
+                Next
+              </button>
+            )}
+            {!showingAnswer && questionData.lastShown && (
+              <p className="italic text-xs">
+                Last seen: {new Date(questionData.lastShown).toLocaleString()}
+              </p>
+            )}
+          </>
         )}
       </div>
 
