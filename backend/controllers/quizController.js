@@ -170,7 +170,9 @@ export async function submitStudentAnswer(req, res) {
       answeredCorrectly,
     });
 
-    res.status(200).json({ answeredCorrectly });
+    res
+      .status(200)
+      .json({ answeredCorrectly, correctAnswer: correctAnswer.answerText });
   } catch (error) {
     console.error("Error submitting answer for student", error);
     res.status(500).json({ message: "Internal server error" });
@@ -178,16 +180,16 @@ export async function submitStudentAnswer(req, res) {
 }
 
 export async function nextQuizQuestion(req, res) {
-  try {
-    const lectureId = req.params.lectureId;
-    const studentId = req.query.userId;
+  const lectureId = req.params.lectureId;
+  const studentId = req.query.userId;
 
+  try {
     const nextQuestion = await getNextQuizQuestion({ lectureId, studentId });
 
     // We don't want to send the correct answer info along
     // in case the student knows how to read network calls :)
     res.status(200).json({
-      ...nextQuestion,
+      ...nextQuestion.toJSON(),
       possibleAnswers: nextQuestion.possibleAnswers.map(
         (answer) => answer.answerText
       ),
@@ -235,7 +237,10 @@ async function getQuizListForCourseData({ user, course }) {
 }
 
 async function getNextQuizQuestion({ lectureId, studentId }) {
-  const allQuestions = await QuizQuestion.find({ lectureId });
+  const allQuestions = await QuizQuestion.find({ lectureId }).populate(
+    "lectureId"
+  );
+
   const allStudentAnswers = await QuizStudentAnswer.find({
     lectureId,
     studentId,
@@ -256,9 +261,13 @@ async function getNextQuizQuestion({ lectureId, studentId }) {
           studentAnswer.createdAt > previousCorrectAnswerTime
             ? studentAnswer.createdAt
             : previousCorrectAnswerTime;
-      } else if (answeredCorrectly) {
+      } else if (studentAnswer.answeredCorrectly) {
         result[questionId] = studentAnswer.createdAt;
-      } else result[questionId] = null;
+      } else {
+        result[questionId] = null;
+      }
+
+      return result;
     },
     {}
   );
@@ -276,9 +285,6 @@ async function getNextQuizQuestion({ lectureId, studentId }) {
     })
     .toSorted(sortQuestionByCreatedAt);
 
-  console.log(`${unansweredQuestions.length} unanswered questions:`);
-  console.log(unansweredQuestions);
-
   if (unansweredQuestions.length > 0) {
     return unansweredQuestions[0];
   }
@@ -287,12 +293,12 @@ async function getNextQuizQuestion({ lectureId, studentId }) {
   // return a question that the student has answered but never gotten right.
   const questionNeverAnsweredCorrectly = Object.entries(
     mostRecentCorrectAnswers
-  ).find((_, timestamp) => timestamp === null);
-  console.log("Question never answered correctly:");
-  console.log(questionNeverAnsweredCorrectly);
+  ).find(([_, timestamp]) => timestamp == null);
+
   if (questionNeverAnsweredCorrectly) {
     return allQuestions.find(
-      (question) => question._id.toString() === questionNeverAnsweredCorrectly
+      (question) =>
+        question._id.toString() === questionNeverAnsweredCorrectly[0]
     );
   }
 
@@ -302,8 +308,6 @@ async function getNextQuizQuestion({ lectureId, studentId }) {
     .filter(([_, timestamp]) => timestamp)
     .toSorted(sortByTimestamp);
 
-  console.log("Question answered correctly:");
-  console.log(questionsAnsweredCorrectly);
   if (questionsAnsweredCorrectly) {
     return allQuestions.find(
       (question) => question._id.toString() === questionsAnsweredCorrectly[0][0]
@@ -325,7 +329,7 @@ function sortQuestionByCreatedAt(questionA, questionB) {
   return 0;
 }
 
-function sortByTimestamp([_, timestampA], [_, timestampB]) {
+function sortByTimestamp([_questionA, timestampA], [_questionB, timestampB]) {
   if (timestampA < timestampB) {
     return -1;
   } else if (timestampB < timestampA) {
