@@ -87,15 +87,17 @@ export default function QuizCourseListPage() {
           </Link>
         ))}
       </ul>
-      <div>
-        <Link
-          to={`/courses/${courseQuizInfo.courseId}/`}
-          className="flex gap-2"
-        >
-          <ArrowUturnLeftIcon className="size-5" />
-          Back to Course Page
-        </Link>
-      </div>
+      {dataLoaded && (
+        <div>
+          <Link
+            to={`/courses/${courseQuizInfo.courseId}/`}
+            className="flex gap-2"
+          >
+            <ArrowUturnLeftIcon className="size-5" />
+            Back to Course Page
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,9 +2,14 @@ import {
   Course,
   Lecture,
   QuizQuestion,
+  QuizStudentAnswer,
   User,
   UserData,
 } from "../models/index.js";
+
+const NEW_QUESTION = "NEW QUESTION";
+const REVIEW_QUESTION = "REVIEW";
+const REPEAT_QUESTION = "REPEAT";
 
 export async function getQuizList(req, res) {
   try {
@@ -145,6 +150,68 @@ export async function deleteQuestion(req, res) {
   }
 }
 
+export async function submitStudentAnswer(req, res) {
+  try {
+    const questionId = req.params.questionId;
+    const studentId = req.query.userId;
+    const studentAnswer = req.body.answer;
+
+    const question = await QuizQuestion.findById(questionId);
+    if (!question) {
+      throw new Error(`Question with ID ${questionId} not found`);
+    }
+
+    const correctAnswer = question.possibleAnswers.find(
+      (answer) => answer.isCorrect
+    );
+
+    const answeredCorrectly = correctAnswer.answerText === studentAnswer;
+
+    await QuizStudentAnswer.create({
+      lectureId: question.lectureId,
+      questionId,
+      studentId,
+      answeredCorrectly,
+    });
+
+    res
+      .status(200)
+      .json({ answeredCorrectly, correctAnswer: correctAnswer.answerText });
+  } catch (error) {
+    console.error("Error submitting answer for student", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function nextQuizQuestion(req, res) {
+  const lectureId = req.params.lectureId;
+  const studentId = req.query.userId;
+
+  try {
+    const [questionType, nextQuestion, lastShown] = await getNextQuizQuestion({
+      lectureId,
+      studentId,
+    });
+
+    // We don't want to send the correct answer info along
+    // in case the student knows how to read network calls :)
+    res.status(200).json({
+      ...nextQuestion.toJSON(),
+      questionType,
+      lastShown,
+      possibleAnswers: nextQuestion.possibleAnswers.map(
+        (answer) => answer.answerText
+      ),
+    });
+  } catch (error) {
+    console.error(
+      `Error getting next question for lecture ${lectureId} for student ${studentId}`,
+      error
+    );
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 // --------------------
 // ----- HELPERS ------
 // --------------------
@@ -176,4 +243,149 @@ async function getQuizListForCourseData({ user, course }) {
       numQuestions: lecture.questionCount,
     })),
   };
+}
+
+async function getNextQuizQuestion({ lectureId, studentId }) {
+  const allQuestions = await QuizQuestion.find({ lectureId }).populate(
+    "lectureId"
+  );
+
+  const allStudentAnswers = await QuizStudentAnswer.find({
+    lectureId,
+    studentId,
+  });
+
+  // { questionId: { correct: [Timestamp], incorrect: [Timestamp] } }
+  const mostRecentAnswers = allStudentAnswers.reduce(
+    (result, studentAnswer) => {
+      const questionId = studentAnswer.questionId.toString();
+      const prevAnswerData = result[questionId];
+
+      result[questionId] = prevAnswerData
+        ? prevAnswerData
+        : { correct: [], incorrect: [] };
+
+      if (studentAnswer.answeredCorrectly) {
+        result[questionId].correct = [
+          ...result[questionId].correct,
+          studentAnswer.createdAt,
+        ];
+      } else {
+        result[questionId].incorrect = [
+          ...result[questionId].incorrect,
+          studentAnswer.createdAt,
+        ];
+      }
+
+      return result;
+    },
+    {}
+  );
+
+  // --------------------------------------------
+  // Our basic "Spaced Repetition" algorithm
+  // --------------------------------------------
+
+  // 1. Get all questions that the student has NOT answered.
+  // If there are any, return the earliest-created question.
+  const unansweredQuestions = allQuestions
+    .filter((question) => {
+      const answeredQuestionIds = Object.keys(mostRecentAnswers);
+      return !answeredQuestionIds.includes(question._id.toString());
+    })
+    .toSorted(sortQuestionByCreatedAt);
+
+  if (unansweredQuestions.length > 0) {
+    return [NEW_QUESTION, unansweredQuestions[0], null];
+  }
+
+  // 2. If all questions have been answered,
+  // return a question that the student has answered but never gotten right.'
+  const questionsNeverAnsweredCorrectly = Object.entries(
+    mostRecentAnswers
+  ).filter(([_, { correct }]) => correct.length === 0);
+
+  if (questionsNeverAnsweredCorrectly.length !== 0) {
+    const { earliestQuestion, lastShown } =
+      questionsNeverAnsweredCorrectly.reduce(
+        (result, [questionId, { incorrect }]) => {
+          const sortedIncorrectTimes = incorrect.toSorted();
+          if (
+            !result.earliestQuestion ||
+            sortedIncorrectTimes[incorrect.length - 1] < result.lastShown
+          ) {
+            result.earliestQuestion = questionId;
+            result.lastShown = sortedIncorrectTimes[incorrect.length - 1];
+          }
+
+          return result;
+        },
+        {}
+      );
+
+    return [
+      REVIEW_QUESTION,
+      allQuestions.find(
+        (question) => question._id.toString() === earliestQuestion
+      ),
+      lastShown,
+    ];
+  }
+
+  // 3. If user has answered all questions right,
+  // return the question that was answered correctly the longest time ago.
+  const questionsAnsweredCorrectly = Object.entries(mostRecentAnswers).filter(
+    ([_, { correct }]) => correct.length !== 0
+  );
+
+  if (questionsAnsweredCorrectly.length !== 0) {
+    const { earliestQuestion, lastShown } = questionsAnsweredCorrectly.reduce(
+      (result, [questionId, { correct }]) => {
+        const sortedCorrectTimes = correct.toSorted();
+        if (
+          !result.earliestQuestion ||
+          sortedCorrectTimes[correct.length - 1] < result.lastShown
+        ) {
+          result.earliestQuestion = questionId;
+          result.lastShown = sortedCorrectTimes[correct.length - 1];
+        }
+
+        return result;
+      },
+      {}
+    );
+
+    return [
+      REPEAT_QUESTION,
+      allQuestions.find(
+        (question) => question._id.toString() === earliestQuestion
+      ),
+      lastShown,
+    ];
+  }
+
+  // 4. If we still haven't found anything, something has gone terribly wrong
+  // but we'll just return the first question that exists
+  return [NEW_QUESTION, allQuestions[0], null];
+}
+
+function sortQuestionByCreatedAt(questionA, questionB) {
+  if (questionA.createdAt < questionB.createdAt) {
+    return -1;
+  } else if (questionB.createdAt < questionA.createdAt) {
+    return 1;
+  }
+
+  return 0;
+}
+
+// [[questionId, { correct:, incorrect: }]]
+function sortByTimestamp([_questionA, timestampA], [_questionB, timestampB]) {
+  if (timestampA < timestampB) {
+    return -1;
+  } else if (timestampB < timestampA) {
+    return 1;
+  }
+
+  return 0;
 }

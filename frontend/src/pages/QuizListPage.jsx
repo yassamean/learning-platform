@@ -23,7 +23,7 @@ export default function QuizListPage() {
         );
         const data = await response.json();
         setQuizzesInfo(data);
-        setDataLoaded(data);
+        setDataLoaded(true);
       } catch (error) {
         console.error(error);
       }
@@ -50,9 +50,9 @@ export default function QuizListPage() {
               <h2 className="text-xl font-bold pb-3">{courseName}</h2>
               {info?.lectureInfo?.map((lecture) => (
                 <Link
-                  to={`/courses/${quizzesInfo.courseId}/lectures/${
-                    lecture.id
-                  }/${user.role === "teacher" ? "manageQuiz" : "quiz"}`}
+                  to={`/courses/${info.courseId}/lectures/${lecture.id}/${
+                    user.role === "teacher" ? "manageQuiz" : "quiz"
+                  }`}
                   key={lecture.id}
                   className="flex cursor-pointer group rounded-lg p-5 bg-gray-50 hover:bg-gray-200 justify-between dark:hover:bg-sky-900 dark:bg-slate-800"
                 >
@@ -81,7 +81,7 @@ export default function QuizListPage() {
                   </p>
                   <Link
                     to={`/courses/${info.courseId}/lectures/create`}
-                    key={`${quizzesInfo.courseId}-create`}
+                    key={`${info.courseId}-create`}
                     className="mt-3 text-blue-500 hover:text-blue-600 "
                   >
                     Create Lecture for {courseName}
