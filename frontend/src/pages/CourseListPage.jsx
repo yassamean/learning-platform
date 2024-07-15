@@ -41,7 +41,6 @@ export default function CourseListPage({ search }) {
         console.error(error);
       }
     }
-
     getEnrollments();
   }, []);
 
@@ -81,7 +80,7 @@ export default function CourseListPage({ search }) {
               <div className="flex min-w-0 gap-x-4">
                 <img
                   className="h-12 w-12 flex-none rounded-full"
-                  src={"/course-pictures/" + course.image}
+                  src={course.image}
                   alt=""
                 />
                 <div className="min-w-0 flex-auto">

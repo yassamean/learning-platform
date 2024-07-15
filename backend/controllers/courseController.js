@@ -6,9 +6,9 @@ export async function getCourses(req, res) {
     const user = await User.findById(userId);
 
     const courses =
-      user.role === "student"
-        ? await Course.find({})
-        : await Course.find({ lecturedBy: user._id });
+      user.role === "teacher"
+        ? await Course.find({ lecturedBy: user._id })
+        : await Course.find({});
 
     res.status(200).json(courses);
   } catch (error) {

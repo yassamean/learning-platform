@@ -1,5 +1,6 @@
 import { useAuth } from "../context/UserContext";
-import { useState, useEffect } from "react";
+import { useDropzone } from "react-dropzone";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 
@@ -14,14 +15,91 @@ export default function CreateLecturePage() {
   const navigate = useNavigate();
   const params = useParams();
 
+  const [error, setError] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [pdfUrl, setPdfUrl] = useState("");
   const [isNew, setIsNew] = useState(true);
   const [form, setForm] = useState({
     title: "",
     description: "",
+    video: "",
     videoUrl: "",
+    pdf: "",
     pdfUrl: "",
     course: "",
   });
+
+  const onDropVideo = useCallback(
+    (acceptedFiles) => {
+      const file = acceptedFiles[0];
+
+      if (file.size > 50 * 1024 * 1024) {
+        // 50 MB size limit
+        setError("Video file size exceeds 50 MB");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm((prevForm) => ({
+          ...prevForm,
+          video: reader.result, // set video as base64 string
+        }));
+        setVideoUrl(reader.result); // set the video URL for display
+        setError(""); // Clear any previous error
+      };
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+      console.log(form.video?.length);
+    },
+    [setForm, setVideoUrl, setError]
+  );
+
+  const onDropPdf = useCallback(
+    (acceptedFiles) => {
+      const file = acceptedFiles[0];
+
+      if (file.size > 5 * 1024 * 1024) {
+        // 5 MB size limit
+        setError("PDF file size exceeds 5 MB");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm((prevForm) => ({
+          ...prevForm,
+          pdf: reader.result, // set pdf as base64 string
+        }));
+        setPdfUrl(reader.result); // set the pdf URL for display
+        setError(""); // Clear any previous error
+      };
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+      console.log(file);
+    },
+    [setForm, setPdfUrl, setError]
+  );
+
+  const { getRootProps: getVideoRootProps, getInputProps: getVideoInputProps } =
+    useDropzone({
+      onDrop: onDropVideo,
+      accept: { "video/mp4": [".mp4"] },
+      maxFiles: 1,
+      maxSize: 1024 * 1024 * 50,
+    });
+
+  const { getRootProps: getPdfRootProps, getInputProps: getPdfInputProps } =
+    useDropzone({
+      onDrop: onDropPdf,
+      accept: { "application/pdf": [".pdf"] },
+      maxFiles: 1,
+      maxSize: 1024 * 1024 * 5,
+    });
 
   function updateForm(value) {
     return setForm((prev) => {
@@ -159,7 +237,7 @@ export default function CreateLecturePage() {
                 Lecture video
               </label>
               <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10 dark:border-slate-400 dark:bg-slate-800">
-                <div className="text-center">
+                <div {...getVideoRootProps()} className="text-center">
                   <FilmIcon
                     className="mx-auto size-20 text-gray-300"
                     aria-hidden="true"
@@ -172,10 +250,10 @@ export default function CreateLecturePage() {
                       <ArrowUpOnSquareIcon className="size-8"></ArrowUpOnSquareIcon>
                       <span className="flex-none">Upload a file</span>
                       <input
-                        id="file-upload"
                         name="file-upload"
                         type="file"
                         className="sr-only"
+                        {...getVideoInputProps()}
                       />
                     </label>
                     <p className="pl-1">or drag and drop</p>
@@ -194,29 +272,29 @@ export default function CreateLecturePage() {
                 Lecture PDF
               </label>
               <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10 dark:border-slate-400 dark:bg-slate-800">
-                <div className="text-center">
+                <div>{form.pdf.path}</div>
+                <div {...getPdfRootProps()} className="text-center">
                   <DocumentArrowUpIcon
                     className="mx-auto size-20 text-gray-300"
                     aria-hidden="true"
                   />
                   <div className="mt-4 flex items-center text-sm leading-6 dark:text-slate-400">
                     <label
-                      htmlFor="file-upload"
+                      htmlFor="pdf-upload"
                       className="flex items-center gap-1 cursor-pointer rounded-xl p-2 dark:hover:bg-sky-900 dark:hover:text-sky-400 font-semibold dark:text-slate-200 dark:bg-slate-700 bg-gray-100 hover:bg-gray-300"
                     >
                       <ArrowUpOnSquareIcon className="size-8"></ArrowUpOnSquareIcon>
                       <span className="flex-none">Upload a file</span>
                       <input
-                        id="file-upload"
-                        name="file-upload"
-                        type="file"
+                        name="pdf-upload"
                         className="sr-only"
+                        {...getPdfInputProps()}
                       />
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
                   <p className="text-xs leading-5 text-gray-600">
-                    MP4 up to 50MB
+                    PDF up to 5MB
                   </p>
                 </div>
               </div>

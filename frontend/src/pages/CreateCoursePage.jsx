@@ -1,6 +1,7 @@
 import { useAuth } from "../context/UserContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useDropzone } from "react-dropzone";
 import { API_BASE_URL } from "../config";
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import {
@@ -14,6 +15,7 @@ export default function CreateCoursePage() {
   const { user } = useAuth();
 
   const [semesterInfo, setSemesterInfo] = useState([]);
+  const [imageUrl, setImageUrl] = useState("");
   const [isNew, setIsNew] = useState(true);
   const [form, setForm] = useState({
     name: "",
@@ -57,9 +59,48 @@ export default function CreateCoursePage() {
     );
   };
 
+  const onDrop = useCallback((acceptedFiles) => {
+    handleImageUpload(acceptedFiles);
+  }, []);
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: {
+      "image/png": [".png"],
+      "image/jpg": [".jpg"],
+      "image/gif": [".gif"],
+    },
+    maxFiles: 1,
+    maxSize: 1024 * 1024,
+  });
+
+  const imageUrlHandler = (value) => {
+    setImageUrl(value);
+    updateForm({ image: value });
+  };
+
   const handleRandomImage = () => {
-    const randomImage = `${Math.floor(Math.random() * 16)}.svg`;
+    const randomImage = `/course-pictures/${Math.floor(
+      Math.random() * 16
+    )}.svg`;
+    setImageUrl(randomImage);
     updateForm({ image: randomImage });
+  };
+
+  const handleImageUpload = (files) => {
+    const file = files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setImageUrl("");
+      setForm((prevForm) => ({
+        ...prevForm,
+        image: reader.result, // set image as base64 string
+      }));
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleDayChange = (event) => {
@@ -132,6 +173,9 @@ export default function CreateCoursePage() {
         return;
       }
       updateForm(course);
+      course.image?.startsWith("/course-pictures/")
+        ? setImageUrl(course.image)
+        : setImageUrl("");
     }
     fetchCourse();
     return;
@@ -198,7 +242,7 @@ export default function CreateCoursePage() {
                     type="text"
                     name="name"
                     id="name"
-                    autoComplete="name"
+                    required
                     value={form.name}
                     onChange={(e) => updateForm({ name: e.target.value })}
                     className="w-full rounded-md py-2 pl-1 pr-4 text-gray-900 ring-1 ring-gray-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-sky-400 dark:hover:bg-sky-900"
@@ -221,7 +265,7 @@ export default function CreateCoursePage() {
                 <textarea
                   id="description"
                   name="description"
-                  rows={3}
+                  rows={7}
                   className="w-full rounded-md py-2 pl-1 pr-4 text-gray-900 ring-1 ring-gray-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-sky-400 dark:hover:bg-sky-900"
                   value={form.description}
                   onChange={(e) => updateForm({ description: e.target.value })}
@@ -252,12 +296,16 @@ export default function CreateCoursePage() {
               >
                 Course photo
               </label>
+              <p className="mt-1 text-sm leading-6 text-gray-600 dark:text-slate-400">
+                You can choose between a randomized image, uploading one to the
+                server or providing a public url to an external one.
+              </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="mt-2 flex flex-col justify-center rounded-lg border border-dashed border-gray-900/25 p-3 dark:border-slate-400 dark:bg-slate-800">
                   <div className="flex justify-center">
                     <img
                       className="size-40 rounded-full"
-                      src={"/course-pictures/" + form.image}
+                      src={form.image}
                       alt=""
                     />
                   </div>
@@ -269,31 +317,54 @@ export default function CreateCoursePage() {
                     Randomize
                   </button>
                 </div>
-                <div className="mt-2 flex grow justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10 dark:border-slate-400 dark:bg-slate-800">
-                  <div className="text-center">
-                    <PhotoIcon
-                      className="mx-auto h-12 w-12 text-gray-300"
-                      aria-hidden="true"
-                    />
-                    <div className="mt-4 flex items-center text-sm leading-6 dark:text-slate-400">
-                      <label
-                        htmlFor="file-upload"
-                        className="flex items-center gap-1 cursor-pointer rounded-xl p-2 dark:hover:bg-sky-900 dark:hover:text-sky-400 font-semibold dark:text-slate-200 dark:bg-slate-700 bg-gray-100 hover:bg-gray-300"
-                      >
-                        <ArrowUpOnSquareIcon className="size-8"></ArrowUpOnSquareIcon>
-                        <span className="flex-none">Upload a file</span>
-                        <input
-                          id="file-upload"
-                          name="file-upload"
-                          type="file"
-                          className="sr-only"
-                        />
-                      </label>
-                      <p className="pl-1">or drag and drop</p>
+                <div className="flex flex-col grow">
+                  <div
+                    {...getRootProps()}
+                    className="mt-2 flex grow justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10 dark:border-slate-400 dark:bg-slate-800"
+                  >
+                    <div className="text-center">
+                      <PhotoIcon
+                        className="mx-auto h-12 w-12 text-gray-300"
+                        aria-hidden="true"
+                      />
+                      <div className="mt-4 flex items-center text-sm leading-6 dark:text-slate-400">
+                        <label
+                          htmlFor="file-upload"
+                          className="flex items-center gap-1 cursor-pointer rounded-xl p-2 dark:hover:bg-sky-900 dark:hover:text-sky-400 font-semibold dark:text-slate-200 dark:bg-slate-700 bg-gray-100 hover:bg-gray-300"
+                        >
+                          <ArrowUpOnSquareIcon className="size-8"></ArrowUpOnSquareIcon>
+                          <span className="flex-none">Upload a file</span>
+                          <input
+                            name="file-upload"
+                            type="file"
+                            accept="image/*"
+                            className="sr-only"
+                            {...getInputProps()}
+                          />
+                        </label>
+                        <p className="pl-1">or drag and drop</p>
+                      </div>
+                      <p className="text-xs leading-5 text-gray-600">
+                        PNG, JPG, GIF up to 1MB
+                      </p>
                     </div>
-                    <p className="text-xs leading-5 text-gray-600">
-                      PNG, JPG, GIF up to 10MB
-                    </p>
+                  </div>
+                  <div className="mt-2 flex grow justify-start items-center rounded-lg border border-dashed border-gray-900/25 p-2 dark:border-slate-400 dark:bg-slate-800">
+                    <label
+                      htmlFor="picture-url"
+                      className="text-gray-900 dark:text-slate-200"
+                    >
+                      Picture Url:
+                    </label>
+                    <input
+                      id="picture-url"
+                      name="picture-url"
+                      type="text"
+                      value={imageUrl}
+                      onChange={(e) => imageUrlHandler(e.target.value)}
+                      placeholder={`/course-pictures/1.svg`}
+                      className="grow rounded-md py-2 ml-2 pl-1 pr-4 text-gray-900 ring-1 ring-gray-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-sky-400 dark:hover:bg-sky-900"
+                    />
                   </div>
                 </div>
               </div>

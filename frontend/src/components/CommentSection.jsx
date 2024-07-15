@@ -83,16 +83,16 @@ const CommentSection = ({ videoSeekTo }) => {
             })}
           </span>
         </div>
-        <p className="text-sm dark:text-slate-200">
-          {convertTimestamps(comment.text)}
-        </p>
+        <div className="text-sm dark:text-slate-200">
+          {convertTimestamps(comment.text, index)}
+        </div>
       </div>
     ));
   };
 
-  const convertTimestamps = (text) => {
+  const convertTimestamps = (text, prefix) => {
     const pattern = /\b(\d:[0-5]\d:[0-5]\d|\d:[0-5]\d|[0-5]\d:[0-5]\d)\b/g;
-    // const pattern = /\s(\d:[0-5]\d|[0-5]\d:[0-5]\d|\d:[0-5]\d:[0-5]\d)\s/gm;
+
     let match;
     const timestamps = [];
     while ((match = pattern.exec(text)) !== null) {
@@ -116,10 +116,11 @@ const CommentSection = ({ videoSeekTo }) => {
 
     let convertedParts = [];
     let lastIndex = 0;
-    timestamps.forEach((timestamp) => {
+    timestamps.forEach((timestamp, index) => {
       convertedParts.push(text.substring(lastIndex, timestamp.start));
       convertedParts.push(
         <span
+          key={`${prefix}-${index}-1`}
           className="text-sky-600 cursor-pointer"
           onClick={() => videoSeekTo(timestamp.seconds)}
         >

@@ -201,8 +201,8 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
     sidebarTabs: (defaultTabs) => [
       {
         content: sidebarNotes,
-        icon: <MessageIcon />,
-        title: "Notes",
+        icon: <PencilIcon className="size-5" />,
+        title: "Highlighted Text",
       },
     ],
     renderToolbar: (Toolbar) => (

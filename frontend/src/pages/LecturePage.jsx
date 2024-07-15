@@ -17,12 +17,10 @@ const LecturePage = () => {
   const playerRef = useRef(null);
   const [lecture, setLecture] = useState({});
   const [watchTime, setWatchTime] = useState(0);
-  const watchTimeRef = useRef(0); //ref is needed because state is deleted on unmount
   const [notes, setNotes] = useState("");
-  const notesRef = useRef(""); //ref is needed because state is deleted on unmount
   const [highlightedText, setHighlightedText] = useState([]);
-  const highlightedTextRef = useRef(""); //ref is needed because state is deleted on unmount
   const hasSeeked = useRef(false);
+  const latestState = useRef({ watchTime, notes, highlightedText });
 
   const courseId = params.courseId.toString();
 
@@ -62,38 +60,32 @@ const LecturePage = () => {
     increaseViewCount();
     getLecture();
     getUserDataLectureData();
-
-    return () => {
-      // called when unmounted
-      updateUserDataLectureData();
-    };
   }, []);
 
-  function debounce(func, delay) {
-    let timeout;
+  const debounce = (func, delay) => {
+    let timeoutId;
     return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), delay);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
     };
-  }
+  };
 
-  const debounceSendData = useCallback(
-    debounce(updateUserDataLectureData, 3000),
+  const debouncedSendData = useCallback(
+    debounce(() => {
+      updateUserDataLectureData(latestState);
+    }, 1500),
     []
   );
 
   useEffect(() => {
-    debounceSendData();
-    const intervalId = setInterval(() => {
-      updateUserDataLectureData();
-    }, 15000); // 15-second interval
+    latestState.current = { watchTime, notes, highlightedText };
+    debouncedSendData();
+  }, [watchTime, notes, highlightedText, debouncedSendData]);
 
-    return () => clearInterval(intervalId); // Cleanup on unmount
-  }, [watchTime, notes, highlightedText]);
-
-  async function updateUserDataLectureData() {
+  async function updateUserDataLectureData(latestState) {
+    console.log(new Date());
     try {
-      const response = await fetch(
+      await fetch(
         `${API_BASE_URL}/userData/${user.userDataId}/updateLectureData`,
         {
           method: "PATCH",
@@ -103,20 +95,11 @@ const LecturePage = () => {
           body: JSON.stringify({
             courseId: courseId,
             lectureId: params.lectureId,
-            watchTime: watchTime,
-            notes: notes,
-            highlightedText: highlightedText,
+            watchTime: latestState.current.watchTime,
+            notes: latestState.current.notes,
+            highlightedText: latestState.current.highlightedText,
           }),
         }
-      );
-      console.log(
-        JSON.stringify({
-          courseId: courseId,
-          lectureId: params.lectureId,
-          watchTime: watchTime,
-          notes: notes,
-          highlightedText: highlightedText,
-        })
       );
     } catch (error) {
       console.error("Error during update:", error);
@@ -208,7 +191,6 @@ const LecturePage = () => {
             value={notes}
             onChange={(e) => {
               setNotes(e.target.value);
-              notesRef.current = e.target.value;
             }}
             className="w-full h-full text-gray-900 dark:text-slate-200 p-2 border rounded-lg bg-orange-50 dark:bg-sky-900/60 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
             placeholder="Write private notes here..."
