@@ -6,6 +6,7 @@ import {
   ArrowUturnLeftIcon,
   PencilSquareIcon,
   ListBulletIcon,
+  BookOpenIcon,
 } from "@heroicons/react/24/outline";
 import CommentSection from "../components/CommentSection";
 import ReactPlayer from "react-player";
@@ -155,8 +156,17 @@ const LecturePage = () => {
           </div>
         )}
       </div>
-      <div className="mt-10 grid grid-flow-row grid-cols-3 gap-5">
-        <div className="p-1 col-span-2 border aspect-video rounded-lg bg-black">
+      <div className="mt-10">
+        <div className="mb-2 text-lg font-bold dark:text-slate-200">
+          Lecture Description
+        </div>
+        <div className="flex  p-4 gap-x-4 bg-gray-50 dark:bg-slate-800 dark:text-slate-200 items-start rounded-lg">
+          <BookOpenIcon className="min-w-6 size-6"></BookOpenIcon>
+          <div className="grow whitespace-pre-wrap">{lecture.description}</div>
+        </div>
+      </div>
+      <div className="mt-5 grid grid-flow-row grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="p-1 col-span-2 border w-full aspect-video rounded-lg bg-black">
           <ReactPlayer
             ref={playerRef}
             onProgress={(state) => setWatchTime(state.playedSeconds)}
@@ -176,7 +186,7 @@ const LecturePage = () => {
             }
           ></ReactPlayer>
         </div>
-        <div className="col-span-1 border rounded-lg dark:bg-slate-800 ">
+        <div className="col-span-1 border rounded-lg dark:bg-slate-800">
           <CommentSection
             videoSeekTo={(watchTime) =>
               playerRef.current.seekTo(watchTime, "seconds")
@@ -184,7 +194,7 @@ const LecturePage = () => {
           ></CommentSection>
         </div>
       </div>
-      <div className="mt-5 grid grid-flow-row grid-cols-2 gap-5">
+      <div className="mt-5 grid grid-flow-row sm:grid-cols-1 md:grid-cols-2 gap-5">
         <div className="border rounded-lg aspect-square p-1 bg-[#f0ecec] dark:bg-[#302c2c]">
           <PDFViewer
             pdfUrl={
@@ -194,7 +204,7 @@ const LecturePage = () => {
             setHighlightedText={setHighlightedText}
           ></PDFViewer>
         </div>
-        <div className="rounded-lg">
+        <div className="rounded-lg aspect-square">
           <textarea
             value={notes}
             onChange={(e) => {

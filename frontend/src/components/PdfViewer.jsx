@@ -1,34 +1,16 @@
-import { useState, useRef, useEffect } from "react";
-import {
-  Button,
-  Position,
-  PrimaryButton,
-  Tooltip,
-  Viewer,
-  Worker,
-} from "@react-pdf-viewer/core";
+import { useRef, useEffect } from "react";
+import { Button, Tooltip, Viewer, Worker } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
-import { highlightPlugin, MessageIcon } from "@react-pdf-viewer/highlight";
+import { highlightPlugin } from "@react-pdf-viewer/highlight";
 
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
-import { PencilIcon } from "@heroicons/react/24/outline";
+import { PencilIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
-  const [message, setMessage] = useState("");
   const notesContainerRef = useRef(null);
   let noteId = highlightedText.length;
-
   const noteEles = new Map();
-  const [currentDoc, setCurrentDoc] = useState(null);
-
-  const handleDocumentLoad = (e) => {
-    setCurrentDoc(e.doc);
-    if (currentDoc && currentDoc !== e.doc) {
-      // User opens new document
-      //   setHighlightedText([]);
-    }
-  };
 
   const renderHighlightTarget = (props) => (
     <div
@@ -54,70 +36,34 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
 
   const renderHighlightContent = (props) => {
     const addNote = () => {
-      if (message !== "") {
+      if (props.selectedText !== "") {
         const note = {
           id: ++noteId,
-          content: message,
           highlightAreas: props.highlightAreas,
           quote: props.selectedText,
         };
-        setHighlightedText(highlightedText.concat([note]));
+        setHighlightedText([...highlightedText, note]);
         props.cancel();
       }
     };
-
-    return (
-      <div
-        className="rounded-lg border"
-        style={{
-          background: "#fff",
-          padding: "8px",
-          position: "absolute",
-          left: `${props.selectionRegion.left}%`,
-          top: `${props.selectionRegion.top + props.selectionRegion.height}%`,
-          zIndex: 1,
-        }}
-      >
-        <div>
-          <textarea
-            rows={3}
-            className="border rounded-lg bg-slate-100 p-1"
-            onChange={(e) => setMessage(e.target.value)}
-          ></textarea>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            marginTop: "8px",
-          }}
-        >
-          <div className="flex flex-1 justify-between">
-            <div>
-              <PrimaryButton onClick={addNote}>Add</PrimaryButton>
-            </div>
-            <div>
-              <Button onClick={props.cancel}>Cancel</Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    addNote();
   };
 
-  const jumpToNote = (note) => {
+  const jumpToNote = (note, index) => {
     activateTab(3);
     const notesContainer = notesContainerRef.current;
-    if (noteEles.has(note.id) && notesContainer) {
+    if (noteEles.has(index) && notesContainer) {
+      // if (noteEles.has(note.id) && notesContainer) {
       notesContainer.scrollTop = noteEles
-        .get(note.id)
+        .get(index)
         .getBoundingClientRect().top;
     }
   };
 
   const renderHighlights = (props) => (
     <div>
-      {highlightedText.map((note) => (
-        <div key={note.id}>
+      {highlightedText.map((note, index) => (
+        <div key={index}>
           {note.highlightAreas
             .filter((area) => area.pageIndex === props.pageIndex)
             .map((area, idx) => (
@@ -131,7 +77,7 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
                   },
                   props.getCssProperties(area, props.rotation)
                 )}
-                onClick={() => jumpToNote(note)}
+                onClick={() => jumpToNote(note, index)}
               />
             ))}
         </div>
@@ -153,6 +99,10 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
     };
   }, []);
 
+  const deleteHighlight = (index) => {
+    setHighlightedText(highlightedText.filter((elmt, idx) => idx !== index));
+  };
+
   const sidebarNotes = (
     <div
       ref={notesContainerRef}
@@ -164,18 +114,19 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
       {highlightedText.length === 0 && (
         <div style={{ textAlign: "center" }}>There is no note</div>
       )}
-      {highlightedText.map((note) => {
+      {highlightedText.map((note, index) => {
         return (
           <div
-            key={note.id}
+            key={index}
             style={{
               borderBottom: "1px solid rgba(0, 0, 0, .3)",
               cursor: "pointer",
               padding: "8px",
             }}
+            className="flex justify-between "
             onClick={() => jumpToHighlightArea(note.highlightAreas[0])}
             ref={(ref) => {
-              noteEles.set(note.id, ref);
+              noteEles.set(index, ref);
             }}
           >
             <blockquote
@@ -183,14 +134,18 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
                 borderLeft: "2px solid rgba(0, 0, 0, 0.2)",
                 fontSize: ".75rem",
                 lineHeight: 1.5,
-                margin: "0 0 8px 0",
                 paddingLeft: "8px",
                 textAlign: "justify",
               }}
             >
               {note.quote}
             </blockquote>
-            {note.content}
+            <button>
+              <XCircleIcon
+                className="size-4 hover:text-red-600"
+                onClick={() => deleteHighlight(index)}
+              ></XCircleIcon>
+            </button>
           </div>
         );
       })}
@@ -252,7 +207,6 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
         }}
         fileUrl={pdfUrl}
         plugins={[highlightPluginInstance, defaultLayoutPluginInstance]}
-        onDocumentLoad={handleDocumentLoad}
       />
     </Worker>
   );

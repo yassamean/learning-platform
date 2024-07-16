@@ -134,7 +134,7 @@ const CommentSection = ({ videoSeekTo }) => {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col max-h-[450px]">
       <div className="relative">
         <form onSubmit={onSubmit}>
           <textarea
@@ -150,8 +150,10 @@ const CommentSection = ({ videoSeekTo }) => {
           >
             <PaperAirplaneIcon className="size-6"></PaperAirplaneIcon>
           </button>
-          <div className="flex divide-y flex-col gap-2">{renderComments()}</div>
         </form>
+      </div>
+      <div className="flex divide-y flex-col gap-2 overflow-auto">
+        {renderComments()}
       </div>
     </div>
   );

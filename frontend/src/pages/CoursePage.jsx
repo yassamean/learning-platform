@@ -156,7 +156,7 @@ function CoursePage() {
         </div>
       </div>
       <div className="mt-10">
-        <div className="grid grid-cols-2 gap-x-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <div className="text-lg mb-2 font-bold dark:text-slate-200">
               Watch the latest Lecture
@@ -233,7 +233,7 @@ function CoursePage() {
           Course Description
         </div>
         <div className="flex  p-4 gap-x-4 bg-gray-50 dark:bg-slate-800 dark:text-slate-200 items-start rounded-lg">
-          <BookOpenIcon className="size-6"></BookOpenIcon>
+          <BookOpenIcon className="min-w-6 size-6"></BookOpenIcon>
           <div className="grow whitespace-pre-wrap">{course.description}</div>
         </div>
       </div>
@@ -241,7 +241,7 @@ function CoursePage() {
         <div className="text-lg font-bold dark:text-slate-200">
           All Lectures
         </div>
-        <div className="grid grid-cols-4 gap-x-4 gap-y-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">
           {lectures.map((lecture) => (
             <VideoCard
               key={lecture._id}
