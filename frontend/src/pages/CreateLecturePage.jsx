@@ -3,6 +3,10 @@ import { useDropzone } from "react-dropzone";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
+import ReactPlayer from "react-player";
+import { Worker } from "@react-pdf-viewer/core";
+import { Viewer } from "@react-pdf-viewer/core";
+import "@react-pdf-viewer/core/lib/styles/index.css";
 
 import {
   ArrowUpOnSquareIcon,
@@ -16,21 +20,20 @@ export default function CreateLecturePage() {
   const params = useParams();
 
   const [error, setError] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
-  const [pdfUrl, setPdfUrl] = useState("");
+  const [videoUrlInput, setVideoUrlInput] = useState("");
+  const [pdfUrlInput, setPdfUrlInput] = useState("");
   const [isNew, setIsNew] = useState(true);
   const [form, setForm] = useState({
     title: "",
     description: "",
-    video: "",
     videoUrl: "",
-    pdf: "",
+    thumbnailUrl: "",
     pdfUrl: "",
     course: "",
   });
 
   const onDropVideo = useCallback(
-    (acceptedFiles) => {
+    async (acceptedFiles) => {
       const file = acceptedFiles[0];
 
       if (file.size > 50 * 1024 * 1024) {
@@ -39,26 +42,15 @@ export default function CreateLecturePage() {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm((prevForm) => ({
-          ...prevForm,
-          video: reader.result, // set video as base64 string
-        }));
-        setVideoUrl(reader.result); // set the video URL for display
-        setError(""); // Clear any previous error
-      };
-
-      if (file) {
-        reader.readAsDataURL(file);
-      }
-      console.log(form.video?.length);
+      const fileUrl = await handleFileUpload(file);
+      // updateForm({ videoUrl: fileUrl });
+      setVideoUrlInput(fileUrl);
     },
-    [setForm, setVideoUrl, setError]
+    [setForm, setVideoUrlInput, setError]
   );
 
   const onDropPdf = useCallback(
-    (acceptedFiles) => {
+    async (acceptedFiles) => {
       const file = acceptedFiles[0];
 
       if (file.size > 5 * 1024 * 1024) {
@@ -67,22 +59,11 @@ export default function CreateLecturePage() {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm((prevForm) => ({
-          ...prevForm,
-          pdf: reader.result, // set pdf as base64 string
-        }));
-        setPdfUrl(reader.result); // set the pdf URL for display
-        setError(""); // Clear any previous error
-      };
-
-      if (file) {
-        reader.readAsDataURL(file);
-      }
-      console.log(file);
+      const fileUrl = await handleFileUpload(file);
+      // updateForm({ pdfUrl: fileUrl });
+      setPdfUrlInput(fileUrl);
     },
-    [setForm, setPdfUrl, setError]
+    [setForm, setPdfUrlInput, setError]
   );
 
   const { getRootProps: getVideoRootProps, getInputProps: getVideoInputProps } =
@@ -107,6 +88,16 @@ export default function CreateLecturePage() {
     });
   }
 
+  const videoUrlHandler = (value) => {
+    setVideoUrlInput(value);
+    console.log(value);
+  };
+
+  const pdfUrlHandler = (value) => {
+    setPdfUrlInput(value);
+    console.log(value);
+  };
+
   useEffect(() => {
     async function fetchLecture() {
       const lectureId = params.lectureId?.toString() || undefined;
@@ -127,14 +118,57 @@ export default function CreateLecturePage() {
         return;
       }
       updateForm(lecture);
+      setVideoUrlInput(lecture.videoUrl);
+      setPdfUrlInput(lecture.pdfUrl);
     }
     fetchLecture();
     return;
   }, [params.id, navigate]);
 
+  async function handleFileUpload(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`${API_BASE_URL}/upload`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.filePath;
+    } else {
+      console.error("Failed to upload file");
+    }
+  }
+
+  async function handleFileDelete(filename) {
+    const response = await fetch(`${API_BASE_URL}/delete/${filename}`, {
+      method: "DELETE",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      // toast maybe?
+    } else {
+      console.error("Failed to delete file");
+    }
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
     const lecture = { ...form };
+    // delete files if changed
+    if (videoUrlInput != lecture.videoUrl) {
+      lecture.videoUrl.startsWith(API_BASE_URL) &&
+        handleFileDelete(lecture.videoUrl.split("/").pop());
+      lecture.videoUrl = videoUrlInput;
+    }
+    if (pdfUrlInput != lecture.pdfUrl) {
+      lecture.pdfUrl.startsWith(API_BASE_URL) &&
+        handleFileDelete(lecture.pdfUrl.split("/").pop());
+      lecture.pdfUrl = pdfUrlInput;
+    }
     try {
       let response;
       if (isNew) {
@@ -236,31 +270,62 @@ export default function CreateLecturePage() {
               >
                 Lecture video
               </label>
-              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10 dark:border-slate-400 dark:bg-slate-800">
-                <div {...getVideoRootProps()} className="text-center">
-                  <FilmIcon
-                    className="mx-auto size-20 text-gray-300"
-                    aria-hidden="true"
-                  />
-                  <div className="mt-4 flex items-center text-sm leading-6 dark:text-slate-400">
-                    <label
-                      htmlFor="file-upload"
-                      className="flex items-center gap-1 cursor-pointer rounded-xl p-2 dark:hover:bg-sky-900 dark:hover:text-sky-400 font-semibold dark:text-slate-200 dark:bg-slate-700 bg-gray-100 hover:bg-gray-300"
-                    >
-                      <ArrowUpOnSquareIcon className="size-8"></ArrowUpOnSquareIcon>
-                      <span className="flex-none">Upload a file</span>
-                      <input
-                        name="file-upload"
-                        type="file"
-                        className="sr-only"
-                        {...getVideoInputProps()}
-                      />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                {videoUrlInput && (
+                  <div className="mt-2 aspect-video w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
+                    <ReactPlayer
+                      width="100%"
+                      height="100%"
+                      controls={true}
+                      url={videoUrlInput}
+                    ></ReactPlayer>
                   </div>
-                  <p className="text-xs leading-5 text-gray-600">
-                    MP4 up to 50MB
-                  </p>
+                )}
+                <div className="grow">
+                  <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10 dark:border-slate-400 dark:bg-slate-800">
+                    <div {...getVideoRootProps()} className="text-center">
+                      <FilmIcon
+                        className="mx-auto size-20 text-gray-300"
+                        aria-hidden="true"
+                      />
+                      <div className="mt-4 flex items-center text-sm leading-6 dark:text-slate-400">
+                        <label
+                          htmlFor="file-upload"
+                          className="flex items-center gap-1 cursor-pointer rounded-xl p-2 dark:hover:bg-sky-900 dark:hover:text-sky-400 font-semibold dark:text-slate-200 dark:bg-slate-700 bg-gray-100 hover:bg-gray-300"
+                        >
+                          <ArrowUpOnSquareIcon className="size-8"></ArrowUpOnSquareIcon>
+                          <span className="flex-none">Upload a file</span>
+                          <input
+                            name="file-upload"
+                            type="file"
+                            className="sr-only"
+                            {...getVideoInputProps()}
+                          />
+                        </label>
+                        <p className="pl-1">or drag and drop</p>
+                      </div>
+                      <p className="text-xs leading-5 text-gray-600">
+                        MP4 up to 50MB
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex grow justify-start items-center rounded-lg border border-dashed border-gray-900/25 p-2 dark:border-slate-400 dark:bg-slate-800">
+                    <label
+                      htmlFor="picture-url"
+                      className="block text-sm font-medium leading-6 text-gray-900 dark:text-slate-200"
+                    >
+                      Video Url:
+                    </label>
+                    <input
+                      id="video-url"
+                      name="video-url"
+                      type="text"
+                      value={videoUrlInput}
+                      onChange={(e) => videoUrlHandler(e.target.value)}
+                      placeholder={`https://www.youtube.com/watch?v=...`}
+                      className="grow rounded-md py-2 ml-2 pl-1 pr-4 text-gray-900 ring-1 ring-gray-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-sky-400 dark:hover:bg-sky-900"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -271,32 +336,59 @@ export default function CreateLecturePage() {
               >
                 Lecture PDF
               </label>
-              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10 dark:border-slate-400 dark:bg-slate-800">
-                <div>{form.pdf.path}</div>
-                <div {...getPdfRootProps()} className="text-center">
-                  <DocumentArrowUpIcon
-                    className="mx-auto size-20 text-gray-300"
-                    aria-hidden="true"
-                  />
-                  <div className="mt-4 flex items-center text-sm leading-6 dark:text-slate-400">
-                    <label
-                      htmlFor="pdf-upload"
-                      className="flex items-center gap-1 cursor-pointer rounded-xl p-2 dark:hover:bg-sky-900 dark:hover:text-sky-400 font-semibold dark:text-slate-200 dark:bg-slate-700 bg-gray-100 hover:bg-gray-300"
-                    >
-                      <ArrowUpOnSquareIcon className="size-8"></ArrowUpOnSquareIcon>
-                      <span className="flex-none">Upload a file</span>
-                      <input
-                        name="pdf-upload"
-                        className="sr-only"
-                        {...getPdfInputProps()}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="grow">
+                  <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10 dark:border-slate-400 dark:bg-slate-800">
+                    <div {...getPdfRootProps()} className="text-center">
+                      <DocumentArrowUpIcon
+                        className="mx-auto size-20 text-gray-300"
+                        aria-hidden="true"
                       />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+                      <div className="mt-4 flex items-center text-sm leading-6 dark:text-slate-400">
+                        <label
+                          htmlFor="pdf-upload"
+                          className="flex items-center gap-1 cursor-pointer rounded-xl p-2 dark:hover:bg-sky-900 dark:hover:text-sky-400 font-semibold dark:text-slate-200 dark:bg-slate-700 bg-gray-100 hover:bg-gray-300"
+                        >
+                          <ArrowUpOnSquareIcon className="size-8"></ArrowUpOnSquareIcon>
+                          <span className="flex-none">Upload a file</span>
+                          <input
+                            name="pdf-upload"
+                            className="sr-only"
+                            {...getPdfInputProps()}
+                          />
+                        </label>
+                        <p className="pl-1">or drag and drop</p>
+                      </div>
+                      <p className="text-xs leading-5 text-gray-600">
+                        PDF up to 5MB
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs leading-5 text-gray-600">
-                    PDF up to 5MB
-                  </p>
+                  <div className="mt-2 flex grow justify-start items-center rounded-lg border border-dashed border-gray-900/25 p-2 dark:border-slate-400 dark:bg-slate-800">
+                    <label
+                      htmlFor="picture-url"
+                      className="block text-sm font-medium leading-6 text-gray-900 dark:text-slate-200"
+                    >
+                      PDF Url:
+                    </label>
+                    <input
+                      id="pdf-url"
+                      name="pdf-url"
+                      type="text"
+                      value={pdfUrlInput}
+                      onChange={(e) => pdfUrlHandler(e.target.value)}
+                      placeholder={`https://ae.cs.uni-frankfurt.de/teaching/24ss/+algo1/skript_gl1_ws1213.pdf`}
+                      className="grow rounded-md py-2 ml-2 pl-1 pr-4 text-gray-900 ring-1 ring-gray-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-sky-400 dark:hover:bg-sky-900"
+                    />
+                  </div>
                 </div>
+                {pdfUrlInput && (
+                  <div className="mt-2 aspect-video w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
+                    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+                      <Viewer fileUrl={pdfUrlInput} />
+                    </Worker>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -83,7 +83,6 @@ const LecturePage = () => {
   }, [watchTime, notes, highlightedText, debouncedSendData]);
 
   async function updateUserDataLectureData(latestState) {
-    console.log(new Date());
     try {
       await fetch(
         `${API_BASE_URL}/userData/${user.userDataId}/updateLectureData`,
@@ -170,7 +169,11 @@ const LecturePage = () => {
             width="100%"
             height="100%"
             controls={true}
-            url="/uploads/videos/example.mp4"
+            url={
+              lecture.videoUrl
+                ? lecture.videoUrl
+                : "/uploads/videos/example.mp4"
+            }
           ></ReactPlayer>
         </div>
         <div className="col-span-1 border rounded-lg dark:bg-slate-800 ">
@@ -184,7 +187,9 @@ const LecturePage = () => {
       <div className="mt-5 grid grid-flow-row grid-cols-2 gap-5">
         <div className="border rounded-lg aspect-square p-1 bg-[#f0ecec] dark:bg-[#302c2c]">
           <PDFViewer
-            pdfUrl="/uploads/pdfs/example2.pdf"
+            pdfUrl={
+              lecture.pdfUrl ? lecture.pdfUrl : "/uploads/pdfs/example.pdf"
+            }
             highlightedText={highlightedText}
             setHighlightedText={setHighlightedText}
           ></PDFViewer>

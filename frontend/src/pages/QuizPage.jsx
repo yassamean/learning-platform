@@ -200,7 +200,10 @@ export default function QuizPage() {
             <div className="flex flex-col place-items-center">
               <h3 className="text-2xl">
                 {performanceData.gradedAnsweredCorrectly}/
-                {performanceData.totalAnswered}
+                {Math.min(
+                  performanceData.totalQuestionsInQuiz,
+                  performanceData.totalAnswered
+                )}
               </h3>
               <p>graded result</p>
               <p className="text-xs">

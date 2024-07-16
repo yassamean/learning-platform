@@ -352,7 +352,7 @@ export default function CreateCoursePage() {
                   <div className="mt-2 flex grow justify-start items-center rounded-lg border border-dashed border-gray-900/25 p-2 dark:border-slate-400 dark:bg-slate-800">
                     <label
                       htmlFor="picture-url"
-                      className="text-gray-900 dark:text-slate-200"
+                      className="block text-sm font-medium leading-6 text-gray-900 dark:text-slate-200"
                     >
                       Picture Url:
                     </label>
