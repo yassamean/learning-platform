@@ -72,7 +72,7 @@ export async function getTeacherQuizOverview(req, res) {
           id: question._id,
           questionText: question.questionText,
           numAnswers: question.possibleAnswers.length,
-          correctAnswer: question.possibleAnswers.find(
+          correctAnswers: question.possibleAnswers.filter(
             (answer) => answer.isCorrect
           ),
         },
@@ -161,11 +161,13 @@ export async function submitStudentAnswer(req, res) {
       throw new Error(`Question with ID ${questionId} not found`);
     }
 
-    const correctAnswer = question.possibleAnswers.find(
+    const correctAnswers = question.possibleAnswers.filter(
       (answer) => answer.isCorrect
     );
 
-    const answeredCorrectly = correctAnswer.answerText === studentAnswer;
+    const answeredCorrectly = correctAnswers
+      .map((answer) => answer.answerText)
+      .includes(studentAnswer);
 
     await QuizStudentAnswer.create({
       lectureId: question.lectureId,
@@ -176,7 +178,10 @@ export async function submitStudentAnswer(req, res) {
 
     res
       .status(200)
-      .json({ answeredCorrectly, correctAnswer: correctAnswer.answerText });
+      .json({
+        answeredCorrectly,
+        correctAnswers: correctAnswers.map((answer) => answer.answerText),
+      });
   } catch (error) {
     console.error("Error submitting answer for student", error);
     res.status(500).json({ message: "Internal server error" });

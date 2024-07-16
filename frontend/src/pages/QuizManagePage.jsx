@@ -95,8 +95,10 @@ export default function QuizManagePage() {
             </h3>
             <p className="mb-4">{question.numAnswers} possible answers</p>
             <p className="mb-4">
-              <b>Correct answer: </b>
-              {question?.correctAnswer?.answerText}
+              <b>Correct answers: </b>
+              {question?.correctAnswers
+                ?.map((answer) => answer.answerText)
+                .join(", ")}
             </p>
 
             <Link

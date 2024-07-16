@@ -47,51 +47,58 @@ export default function QuizListPage() {
       )}
       <ul role="list" className="flex flex-col grow gap-y-2 pt-5">
         {quizzesInfo &&
-          Object.entries(quizzesInfo).map(([courseName, info]) => (
-            <div key={courseName}>
-              <h2 className="text-xl font-bold pb-3">{courseName}</h2>
-              {info?.lectureInfo?.map((lecture) => (
-                <Link
-                  to={`/courses/${info.courseId}/lectures/${lecture.id}/${
-                    user.role === "teacher" ? "manageQuiz" : "quiz"
-                  }`}
-                  key={lecture.id}
-                  className="flex cursor-pointer group rounded-lg p-5 bg-gray-50 hover:bg-gray-200 justify-between dark:hover:bg-sky-900 dark:bg-slate-800"
-                >
-                  <div className="flex min-w-0 gap-x-4">
-                    <div className="flex min-w-0 gap-3">
-                      <p className="text-lg font-semibold leading-6 text-gray-900 dark:text-slate-200">
-                        {lecture.title}
-                      </p>
-                      <PencilSquareIcon className="size-6 dark:text-slate-200" />
-                    </div>
-                  </div>
-                  <div className="flex gap-x-6">
-                    <div className="flex flex-col items-end">
-                      <p className="text-sm leading-6 text-gray-900 dark:text-slate-400">
-                        {lecture.numQuestions} questions
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-              {info?.lectureInfo?.length === 0 && user.role === "teacher" && (
-                <div className="flex flex-col gap-2">
-                  <p>
-                    This course currently has no lectures. A quiz must be
-                    associated with a lecture.
-                  </p>
-                  <Link
-                    to={`/courses/${info.courseId}/lectures/create`}
-                    key={`${info.courseId}-create`}
-                    className="mt-3 text-blue-500 hover:text-blue-600 "
-                  >
-                    Create Lecture for {courseName}
-                  </Link>
+          Object.entries(quizzesInfo).map(([courseName, info]) => {
+            const lectureInfo = info?.lectureInfo;
+            return (
+              lectureInfo &&
+              lectureInfo.length > 0 && (
+                <div key={courseName}>
+                  <h2 className="text-xl font-bold pb-3">{courseName}</h2>
+                  {info?.lectureInfo?.map((lecture) => (
+                    <Link
+                      to={`/courses/${info.courseId}/lectures/${lecture.id}/${
+                        user.role === "teacher" ? "manageQuiz" : "quiz"
+                      }`}
+                      key={lecture.id}
+                      className="flex cursor-pointer group rounded-lg p-5 bg-gray-50 hover:bg-gray-200 justify-between dark:hover:bg-sky-900 dark:bg-slate-800"
+                    >
+                      <div className="flex min-w-0 gap-x-4">
+                        <div className="flex min-w-0 gap-3">
+                          <p className="text-lg font-semibold leading-6 text-gray-900 dark:text-slate-200">
+                            {lecture.title}
+                          </p>
+                          <PencilSquareIcon className="size-6 dark:text-slate-200" />
+                        </div>
+                      </div>
+                      <div className="flex gap-x-6">
+                        <div className="flex flex-col items-end">
+                          <p className="text-sm leading-6 text-gray-900 dark:text-slate-400">
+                            {lecture.numQuestions} questions
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                  {info?.lectureInfo?.length === 0 &&
+                    user.role === "teacher" && (
+                      <div className="flex flex-col gap-2">
+                        <p>
+                          This course currently has no lectures. A quiz must be
+                          associated with a lecture.
+                        </p>
+                        <Link
+                          to={`/courses/${info.courseId}/lectures/create`}
+                          key={`${info.courseId}-create`}
+                          className="mt-3 text-blue-500 hover:text-blue-600 "
+                        >
+                          Create Lecture for {courseName}
+                        </Link>
+                      </div>
+                    )}
                 </div>
-              )}
-            </div>
-          ))}
+              )
+            );
+          })}
       </ul>
     </div>
   );

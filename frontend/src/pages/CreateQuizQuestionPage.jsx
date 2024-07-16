@@ -83,8 +83,8 @@ export default function CreateQuizQuestionPage() {
     setError("");
 
     const correctAnswers = possibleAnswers.filter((answer) => answer.isCorrect);
-    if (correctAnswers.length !== 1) {
-      setError("There must be exactly one correct answer.");
+    if (correctAnswers.length === possibleAnswers.length) {
+      setError("Every answer can't be right");
       return;
     }
 
@@ -155,7 +155,7 @@ export default function CreateQuizQuestionPage() {
                     htmlFor={`answers[${index}]`}
                     className="block text-sm font-medium leading-6 text-gray-900 dark:text-slate-200"
                   >
-                    Answer {index}:
+                    Answer {index + 1}:
                     <span className="flex gap-2 w-fit align-center">
                       <input
                         type="text"
@@ -206,7 +206,7 @@ export default function CreateQuizQuestionPage() {
             </div>
             <Link
               to={`/courses/${courseId}/lectures/${lectureId}/manageQuiz`}
-              className="flex gap-2"
+              className="flex gap-2 dark:text-slate-300"
             >
               <ArrowUturnLeftIcon className="size-5" />
               Back to Quiz Page
