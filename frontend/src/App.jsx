@@ -16,7 +16,6 @@ import NotFoundPage from "./pages/NotFoundPage";
 import DashboardPage from "./pages/Dashboard";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import TeacherDashboardPage from "./pages/TeacherDashboardPage";
-import UserSettingsPage from "./pages/UserSettingsPage";
 
 import CoursePage from "./pages/CoursePage";
 import CourseListPage from "./pages/CourseListPage";
@@ -69,14 +68,6 @@ function App() {
           <Route
             path="/create-password/:token"
             element={<CreatePasswordPage />}
-          />
-          <Route
-            path="/me"
-            element={
-              <ProtectedRoute roles={["student", "teacher", "admin"]}>
-                <UserSettingsPage />
-              </ProtectedRoute>
-            }
           />
           {/* -------------------------------------  */}
           {/* Dashboards  */}

@@ -56,13 +56,6 @@ const tiles = [
     role: ["teacher"],
     buttonLink: "/quizzes",
   },
-  {
-    title: "Profile Settings",
-    description: "Update your profile settings and change your password.",
-    buttonText: "Go to Profile Settings",
-    role: ["student", "teacher", "admin"],
-    buttonLink: "/me",
-  },
 ];
 
 const Dashboard = () => {
