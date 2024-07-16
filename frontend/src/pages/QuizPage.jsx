@@ -21,10 +21,7 @@ export default function QuizPage() {
   const [showingAnswer, setShowingAnswer] = useState(false);
   const [lastQuestionResult, setLastQuestionResult] = useState(null);
 
-  const [currentPerformancePercentage, setCurrentPerformancePercentage] =
-    useState(19);
-  const [totalCorrect, setTotalCorret] = useState(9);
-  const [totalAsked, setTotalAsked] = useState(10);
+  const performanceData = questionData?.performanceData;
 
   const questionTypeStyling = (questionType) => {
     switch (questionType) {
@@ -74,6 +71,7 @@ export default function QuizPage() {
       const data = await response.json();
       setQuestionData(data);
       setLectureName(data.lectureId.title);
+      console.log(questionData);
     } catch (error) {
       console.error(error);
     }
@@ -179,33 +177,47 @@ export default function QuizPage() {
         </Link>
       </div>
       <div>
-        <div className="grid grid grid-cols-2 mt-4 max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg dark:text-white dark:bg-slate-800">
-          <div>
-            <p>Current performance: {currentPerformancePercentage}%</p>
-            {currentPerformancePercentage < 20 && (
-              <p className="text-red-800 dark:text-red-400">
-                Your performance has fallen below 20% of questions answered
-                correctly. Perhaps you would like to{" "}
-                <Link
-                  to={`/courses/${courseId}/lectures/${lectureId}`}
-                  className="underline font-bold hover:text-red-400 hover:dark:text-red-200"
-                >
-                  review the lecture material
-                </Link>
-                ?
+        {performanceData && (
+          <div className="grid grid grid-cols-2 mt-4 max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg dark:text-white dark:bg-slate-800">
+            <div>
+              <p>
+                Current performance: {performanceData.performancePercentage}%
               </p>
-            )}
+              {performanceData.performancePercentage < 20 && (
+                <p className="text-red-800 dark:text-red-400">
+                  Your performance has fallen below 20% of questions answered
+                  correctly. Perhaps you would like to{" "}
+                  <Link
+                    to={`/courses/${courseId}/lectures/${lectureId}`}
+                    className="underline font-bold hover:text-red-400 hover:dark:text-red-200"
+                  >
+                    review the lecture material
+                  </Link>
+                  ?
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col place-items-center">
+              <h3 className="text-2xl">
+                {performanceData.gradedAnsweredCorrectly}/
+                {Math.min(
+                  performanceData.totalQuestionsInQuiz,
+                  performanceData.totalAnswered
+                )}
+              </h3>
+              <p>graded result</p>
+              <p className="text-xs">
+                {" "}
+                You have {performanceData.unansweredQuestions} unanswered
+                questions remaining
+              </p>
+            </div>
           </div>
-          <div className="flex flex-col place-items-center">
-            <h3 className="text-2xl"> 9/10</h3>
-            <p>graded result</p>
-          </div>
-        </div>
+        )}
         <p className="text-small mt-4 max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg dark:text-white dark:bg-slate-800">
-          This quiz will repeat questions according to Spaced Repitition. You
-          will always see new or questions you answered incorrectly first, and
-          then you will be asked questions you've answered correctly for review
-          purposes. However,{" "}
+          This quiz will repeat questions according to Spaced Repitition.
+          <br />
+          However,{" "}
           <b>you will be graded on your first answer for each question.</b>
         </p>
       </div>
