@@ -20,7 +20,11 @@ export default function QuizPage() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [showingAnswer, setShowingAnswer] = useState(false);
   const [lastQuestionResult, setLastQuestionResult] = useState(null);
-  const [currentPerformance, setCurrentPerformance] = useState(19);
+
+  const [currentPerformancePercentage, setCurrentPerformancePercentage] =
+    useState(19);
+  const [totalCorrect, setTotalCorret] = useState(9);
+  const [totalAsked, setTotalAsked] = useState(10);
 
   const questionTypeStyling = (questionType) => {
     switch (questionType) {
@@ -177,12 +181,15 @@ export default function QuizPage() {
       <div>
         <div className="grid grid grid-cols-2 mt-4 max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg dark:text-white dark:bg-slate-800">
           <div>
-            <p>Current performance: {currentPerformance}%</p>
-            {currentPerformance < 20 && (
+            <p>Current performance: {currentPerformancePercentage}%</p>
+            {currentPerformancePercentage < 20 && (
               <p className="text-red-800 dark:text-red-400">
                 Your performance has fallen below 20% of questions answered
                 correctly. Perhaps you would like to{" "}
-                <Link className="underline font-bold hover:text-red-400 hover:dark:text-red-200">
+                <Link
+                  to={`/courses/${courseId}/lectures/${lectureId}`}
+                  className="underline font-bold hover:text-red-400 hover:dark:text-red-200"
+                >
                   review the lecture material
                 </Link>
                 ?

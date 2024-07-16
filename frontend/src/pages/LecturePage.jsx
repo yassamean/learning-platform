@@ -110,7 +110,7 @@ const LecturePage = () => {
     <div className="">
       <div className="flex justify-between">
         <div>
-          <h1 className="text-lg pt-10 text-gray-900 dark:text-slate-400">
+          <h1 className="text-lg pt-10 text-gray-900 dark:text-slate-300">
             Lecture:
           </h1>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-200">
@@ -126,8 +126,11 @@ const LecturePage = () => {
               Manage Quiz
             </Link>
           ) : null}
-          <Link to={`/courses/${courseId}/`} className="flex gap-2">
-            <ArrowUturnLeftIcon className="size-5" />
+          <Link
+            to={`/courses/${courseId}/`}
+            className="flex gap-2 dark:text-slate-300"
+          >
+            <ArrowUturnLeftIcon className="size-5 " />
             Back to Course Page
           </Link>
         </div>
@@ -148,7 +151,7 @@ const LecturePage = () => {
               className="flex flex-col mr-2 place-items-center gap-1"
             >
               <PencilSquareIcon className="size-8 dark:text-slate-200"></PencilSquareIcon>
-              <span>Lecture Quiz</span>
+              <span className="dark:text-slate-300">Lecture Quiz</span>
             </Link>
           </div>
         )}

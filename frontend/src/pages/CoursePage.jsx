@@ -126,7 +126,7 @@ function CoursePage() {
           </h1>
           {["teacher"].includes(user.role) ? (
             <Link
-              className="flex gap-2 place-items-center mt-2"
+              className="flex gap-2 place-items-center mt-2 dark:text-slate-300"
               to={`/courses/${courseId}/quizzes`}
             >
               <ListBulletIcon className="size-6 dark:text-slate-200" />
