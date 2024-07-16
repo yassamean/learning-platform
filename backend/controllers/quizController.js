@@ -188,10 +188,23 @@ export async function nextQuizQuestion(req, res) {
   const studentId = req.query.userId;
 
   try {
-    const [questionType, nextQuestion, lastShown] = await getNextQuizQuestion({
+    const studentAnswerSummary = await getQuizStudentAnswerSummary({
       lectureId,
       studentId,
     });
+
+    const [questionType, nextQuestion, lastShown] = await getNextQuizQuestion({
+      lectureId,
+      studentAnswerSummary,
+    });
+
+    const {
+      totalQuestionsInQuiz,
+      totalAnswered,
+      totalUniqueAnswered,
+      gradedAnsweredCorrectly,
+      performancePercentage,
+    } = await getCurrentPerformance({ lectureId, studentAnswerSummary });
 
     // We don't want to send the correct answer info along
     // in case the student knows how to read network calls :)
@@ -199,6 +212,13 @@ export async function nextQuizQuestion(req, res) {
       ...nextQuestion.toJSON(),
       questionType,
       lastShown,
+      performanceData: {
+        unansweredQuestions: totalQuestionsInQuiz - totalUniqueAnswered,
+        totalAnswered,
+        totalQuestionsInQuiz,
+        gradedAnsweredCorrectly,
+        performancePercentage,
+      },
       possibleAnswers: nextQuestion.possibleAnswers.map(
         (answer) => answer.answerText
       ),
@@ -245,41 +265,9 @@ async function getQuizListForCourseData({ user, course }) {
   };
 }
 
-async function getNextQuizQuestion({ lectureId, studentId }) {
+async function getNextQuizQuestion({ lectureId, studentAnswerSummary }) {
   const allQuestions = await QuizQuestion.find({ lectureId }).populate(
     "lectureId"
-  );
-
-  const allStudentAnswers = await QuizStudentAnswer.find({
-    lectureId,
-    studentId,
-  });
-
-  // { questionId: { correct: [Timestamp], incorrect: [Timestamp] } }
-  const mostRecentAnswers = allStudentAnswers.reduce(
-    (result, studentAnswer) => {
-      const questionId = studentAnswer.questionId.toString();
-      const prevAnswerData = result[questionId];
-
-      result[questionId] = prevAnswerData
-        ? prevAnswerData
-        : { correct: [], incorrect: [] };
-
-      if (studentAnswer.answeredCorrectly) {
-        result[questionId].correct = [
-          ...result[questionId].correct,
-          studentAnswer.createdAt,
-        ];
-      } else {
-        result[questionId].incorrect = [
-          ...result[questionId].incorrect,
-          studentAnswer.createdAt,
-        ];
-      }
-
-      return result;
-    },
-    {}
   );
 
   // --------------------------------------------
@@ -290,7 +278,7 @@ async function getNextQuizQuestion({ lectureId, studentId }) {
   // If there are any, return the earliest-created question.
   const unansweredQuestions = allQuestions
     .filter((question) => {
-      const answeredQuestionIds = Object.keys(mostRecentAnswers);
+      const answeredQuestionIds = Object.keys(studentAnswerSummary.questions);
       return !answeredQuestionIds.includes(question._id.toString());
     })
     .toSorted(sortQuestionByCreatedAt);
@@ -302,7 +290,7 @@ async function getNextQuizQuestion({ lectureId, studentId }) {
   // 2. If all questions have been answered,
   // return a question that the student has answered but never gotten right.'
   const questionsNeverAnsweredCorrectly = Object.entries(
-    mostRecentAnswers
+    studentAnswerSummary.questions
   ).filter(([_, { correct }]) => correct.length === 0);
 
   if (questionsNeverAnsweredCorrectly.length !== 0) {
@@ -334,9 +322,9 @@ async function getNextQuizQuestion({ lectureId, studentId }) {
 
   // 3. If user has answered all questions right,
   // return the question that was answered correctly the longest time ago.
-  const questionsAnsweredCorrectly = Object.entries(mostRecentAnswers).filter(
-    ([_, { correct }]) => correct.length !== 0
-  );
+  const questionsAnsweredCorrectly = Object.entries(
+    studentAnswerSummary.questions
+  ).filter(([_, { correct }]) => correct.length !== 0);
 
   if (questionsAnsweredCorrectly.length !== 0) {
     const { earliestQuestion, lastShown } = questionsAnsweredCorrectly.reduce(
@@ -369,21 +357,88 @@ async function getNextQuizQuestion({ lectureId, studentId }) {
   return [NEW_QUESTION, allQuestions[0], null];
 }
 
+async function getCurrentPerformance({ lectureId, studentAnswerSummary }) {
+  const totalQuestionsInQuiz = (await QuizQuestion.find({ lectureId })).length;
+
+  // Number of unique questions have been answered
+  const totalUniqueAnswered = Object.entries(
+    studentAnswerSummary.questions
+  ).length;
+
+  // Number of times any question has been answered by the student, including repeats
+  const totalAnswered =
+    studentAnswerSummary.totalCorrect + studentAnswerSummary.totalIncorrect;
+
+  // Number of questions answered correctly the first time
+  const gradedAnsweredCorrectly = Object.entries(
+    studentAnswerSummary.questions
+  ).filter(
+    ([_lectureId, { correct, incorrect }]) =>
+      incorrect.length === 0 ||
+      (correct.length > 0 && correct.toSorted()[0] < incorrect.toSorted()[0])
+  ).length;
+
+  // Percentage of correct answers, including repeat asks
+  const performancePercentage =
+    totalAnswered > 0
+      ? ((studentAnswerSummary.totalCorrect / totalAnswered) * 100).toFixed(2)
+      : "100";
+
+  return {
+    totalQuestionsInQuiz,
+    totalAnswered,
+    totalUniqueAnswered,
+    gradedAnsweredCorrectly,
+    performancePercentage,
+  };
+}
+
+// {
+//   totalCorrect: Int,
+//   totalIncorrect: Int,
+//   questionId: { correct: [Timestamp], incorrect: [Timestamp] },
+// }
+async function getQuizStudentAnswerSummary({ lectureId, studentId }) {
+  const allStudentAnswers = await QuizStudentAnswer.find({
+    lectureId,
+    studentId,
+  });
+
+  const answerSummary = allStudentAnswers.reduce(
+    (result, studentAnswer) => {
+      const questionId = studentAnswer.questionId.toString();
+      const prevAnswerData = result.questions[questionId];
+
+      result.questions[questionId] = prevAnswerData
+        ? prevAnswerData
+        : { correct: [], incorrect: [] };
+
+      if (studentAnswer.answeredCorrectly) {
+        result.totalCorrect += 1;
+        result.questions[questionId].correct = [
+          ...result.questions[questionId].correct,
+          studentAnswer.createdAt,
+        ];
+      } else {
+        result.totalIncorrect += 1;
+        result.questions[questionId].incorrect = [
+          ...result.questions[questionId].incorrect,
+          studentAnswer.createdAt,
+        ];
+      }
+
+      return result;
+    },
+    { totalCorrect: 0, totalIncorrect: 0, questions: {} }
+  );
+
+  return answerSummary;
+}
+
 function sortQuestionByCreatedAt(questionA, questionB) {
   if (questionA.createdAt < questionB.createdAt) {
     return -1;
   } else if (questionB.createdAt < questionA.createdAt) {
-    return 1;
-  }
-
-  return 0;
-}
-
-// [[questionId, { correct:, incorrect: }]]
-function sortByTimestamp([_questionA, timestampA], [_questionB, timestampB]) {
-  if (timestampA < timestampB) {
-    return -1;
-  } else if (timestampB < timestampA) {
     return 1;
   }
 
