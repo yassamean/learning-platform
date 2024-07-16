@@ -3,8 +3,8 @@
 // related to the given lecture.
 
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { ArrowUturnLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { API_BASE_URL } from "../config";
 
 export default function CreateQuizQuestionPage() {
@@ -198,12 +198,19 @@ export default function CreateQuizQuestionPage() {
               </button>
               <button
                 type="submit"
-                className="rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 dark:text-slate-200 shadow-sm dark:hover:bg-sky-900 dark:hover:text-sky-400 hover:bg-gray-300 hover:cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 dark:text-slate-200 shadow-sm dark:disabled:bg-slate-800 dark:hover:bg-sky-900 dark:hover:text-sky-400 hover:bg-gray-300 hover:cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed"
                 disabled={!isFormValid()}
               >
                 Save
               </button>
             </div>
+            <Link
+              to={`/courses/${courseId}/lectures/${lectureId}/manageQuiz`}
+              className="flex gap-2"
+            >
+              <ArrowUturnLeftIcon className="size-5" />
+              Back to Quiz Page
+            </Link>
 
             {error && <p style={{ color: "red" }}>{error}</p>}
           </div>

@@ -33,16 +33,18 @@ export default function QuizListPage() {
   }, []);
 
   return (
-    <div className="flex flex-col ml-4">
+    <div className="flex flex-col ml-4 dark:text-slate-200">
       <div className="pt-10 flex items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-200">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Quizzes Overview
         </h1>
       </div>
       {dataLoaded && Object.keys(quizzesInfo).length === 0 && (
         <p className="mt-2">{noQuizzesMessage}</p>
       )}
-      {!dataLoaded && <p className="mt-2">Loading quizzes...</p>}
+      {!dataLoaded && (
+        <p className="mt-2 dark:text-white">Loading quizzes...</p>
+      )}
       <ul role="list" className="flex flex-col grow gap-y-2 pt-5">
         {quizzesInfo &&
           Object.entries(quizzesInfo).map(([courseName, info]) => (

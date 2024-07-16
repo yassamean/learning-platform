@@ -40,7 +40,7 @@ export default function QuizCourseListPage() {
   }, []);
 
   return (
-    <div className="flex flex-col ml-3 gap-5">
+    <div className="flex flex-col ml-3 gap-5  dark:text-white">
       <div className="pt-10 flex flex-col gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-200">
           Quizzes{" "}

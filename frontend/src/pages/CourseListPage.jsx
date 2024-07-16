@@ -51,7 +51,7 @@ export default function CourseListPage({ search }) {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-200">
             Available Courses
           </h1>
-          <h1 className="text-lg text-gray-900 dark:text-slate-400">
+          <h1 className="text-lg text-gray-900 dark:text-slate-300">
             {user.role === "student"
               ? "Find a course you are interested in"
               : "Manage the courses you are teaching"}

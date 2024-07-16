@@ -62,14 +62,16 @@ export default function QuizManagePage() {
   }, [params.id, navigate]);
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg dark:text-slate-300 dark:bg-slate-800">
       {deleteQuestionFailed ? (
         <span className="text-red-700">
           Sorry, we couldn't delete the question.
         </span>
       ) : null}
       <div className="flex flex-col gap-2 place-items-center">
-        <h2 className="text-2xl font-semibold text-center">Manage Quiz</h2>
+        <h2 className="text-2xl font-semibold text-center dark:text-white">
+          Manage Quiz
+        </h2>
         <Link to={`/courses/${params.courseId}/lectures/${params.lectureId}`}>
           <h2 className="text-xl hover:text-blue-500">
             {quizData.lectureTitle}
@@ -112,7 +114,10 @@ export default function QuizManagePage() {
           </li>
         ))}
       </ul>
-      <Link to={`/courses/${courseId}/quizzes`} className=" flex mt-4 gap-3">
+      <Link
+        to={`/courses/${courseId}/quizzes`}
+        className=" flex mt-4 gap-3 dark:text-white"
+      >
         <ArrowUturnLeftIcon className="size-5" />
         Back to Quizzes Page
       </Link>

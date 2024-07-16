@@ -204,7 +204,7 @@ function CoursePage() {
                 <div className="">
                   Quizpage:{" "}
                   <Link
-                    className="font-bold text-blue-600"
+                    className="font-bold text-blue-600 dark:text-blue-300 dark:hover:text-blue-600"
                     to={`/courses/${courseId}/quizzes`}
                   >
                     Link
