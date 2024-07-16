@@ -5,11 +5,11 @@ const LandingPage = () => {
   const { user } = useAuth();
 
   return (
-    <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md">
+    <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md dark:text-white dark:bg-slate-800">
       <h1 className="text-3xl font-bold mb-4">
         Welcome to the School Learning Platform
       </h1>
-      <p className="mb-6 text-gray-700">
+      <p className="mb-6 text-gray-700 dark:text-slate-300">
         Our platform is designed to help school students learn various topics
         effectively. Whether you need help with your homework or want to deepen
         your understanding of a subject, we are here to assist you.

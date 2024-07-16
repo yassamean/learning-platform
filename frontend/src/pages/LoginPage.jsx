@@ -61,12 +61,15 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md">
+    <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md dark:text-white dark:bg-slate-800">
       <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
       {error && <p className="text-red-500">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="identifier">
+          <label
+            className="block text-gray-700 mb-2 dark:text-slate-200"
+            htmlFor="identifier"
+          >
             Username or Email
           </label>
           <input
@@ -75,12 +78,15 @@ const LoginPage = () => {
             name="identifier"
             value={formData.identifier}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded dark:text-black"
             required
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="password">
+          <label
+            className="block text-gray-700 mb-2 dark:text-slate-200"
+            htmlFor="password"
+          >
             Password
           </label>
           <input
@@ -89,7 +95,7 @@ const LoginPage = () => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded dark:text-black"
             required
           />
         </div>
@@ -109,13 +115,19 @@ const LoginPage = () => {
         </button>
         <p className="mt-4 text-center">
           Don't have an account?{" "}
-          <Link to="/register" className="text-blue-500 hover:underline">
+          <Link
+            to="/register"
+            className="text-blue-500 hover:underline dark:text-blue-400"
+          >
             Register here
           </Link>
         </p>
         <p className="mt-4 text-center">
           Forgot your password?{" "}
-          <Link to="/reset-password" className="text-blue-500 hover:underline">
+          <Link
+            to="/reset-password"
+            className="text-blue-500 hover:underline dark:text-blue-400"
+          >
             Reset it here
           </Link>
         </p>

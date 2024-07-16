@@ -63,12 +63,15 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md">
+    <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md dark:text-white dark:bg-slate-800">
       <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
       {error && <p className="text-red-500">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="username">
+          <label
+            className="block text-gray-700 mb-2 dark:text-slate-200"
+            htmlFor="username"
+          >
             Username
           </label>
           <input
@@ -77,12 +80,15 @@ const RegisterPage = () => {
             name="username"
             value={formData.username}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded dark:text-black"
             required
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="email">
+          <label
+            className="block text-gray-700 mb-2 dark:text-slate-200"
+            htmlFor="email"
+          >
             Email
           </label>
           <input
@@ -91,12 +97,15 @@ const RegisterPage = () => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded dark:text-black"
             required
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="password">
+          <label
+            className="block text-gray-700 mb-2 dark:text-slate-200"
+            htmlFor="password"
+          >
             Password
           </label>
           <input
@@ -105,12 +114,15 @@ const RegisterPage = () => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded dark:text-black"
             required
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="confirmPassword">
+          <label
+            className="block text-gray-700 mb-2 dark:text-slate-200"
+            htmlFor="confirmPassword"
+          >
             Confirm Password
           </label>
           <input
@@ -119,7 +131,7 @@ const RegisterPage = () => {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded dark:text-black"
             required
           />
         </div>
@@ -139,7 +151,10 @@ const RegisterPage = () => {
         </button>
         <p className="mt-4 text-center">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-500 hover:underline">
+          <Link
+            to="/login"
+            className="text-blue-500 hover:underline dark:text-blue-400"
+          >
             Log in
           </Link>
         </p>

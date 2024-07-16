@@ -39,15 +39,18 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md">
+    <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md dark:bg-slate-800 dark:text-white">
       <h2 className="text-2xl font-bold mb-6 text-center">Reset Password</h2>
-      <p className="mb-6 text-gray-700">
+      <p className="mb-6 text-gray-700 dark:text-slate-200">
         Enter the email address associated with your account and we will send
         you a link to reset your password if an account exists.
       </p>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="email">
+          <label
+            className="block text-gray-700 mb-2 dark:text-slate-200"
+            htmlFor="email"
+          >
             Email
           </label>
           <input
@@ -56,7 +59,7 @@ const ResetPasswordPage = () => {
             name="email"
             value={email}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded dark:text-black"
             required
           />
         </div>
@@ -68,7 +71,10 @@ const ResetPasswordPage = () => {
         </button>
         <p className="mt-4 text-center">
           Don't have an account?{" "}
-          <Link to="/register" className="text-blue-500 hover:underline">
+          <Link
+            to="/register"
+            className="text-blue-500 dark:text-blue-400 hover:underline"
+          >
             Register here
           </Link>
         </p>
