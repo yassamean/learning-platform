@@ -70,9 +70,9 @@ const TeacherDashboardPage = () => {
 			</header>
 			<div className="overflow-x-auto max-h-96">
 				<table className="min-w-full bg-white dark:bg-slate-700 dark:text-slate-200">
-					<thead className="bg-gray-200 dark:bg-slate-800 sticky top-0 z-10">
+					<thead className="bg-gray-200 dark:bg-slate-800 sticky top-0">
 						<tr>
-							<th className="py-2 px-4 border-b text-start ">
+							<th className="py-2 px-4 border-b text-start">
 								Username
 							</th>
 							<th className="py-2 px-4 border-b text-start">
@@ -108,7 +108,7 @@ const TeacherDashboardPage = () => {
 							</tr>
 						))}
 					</tbody>
-					<tfoot className="bg-gray-100 sticky bottom-0 z-10">
+					<tfoot className="bg-gray-100 sticky bottom-0">
 						<tr>
 							<td
 								className="py-2 px-4 border-t dark:bg-slate-800"
