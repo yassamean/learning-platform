@@ -46,7 +46,7 @@ export default function QuizListPage() {
       <ul role="list" className="flex flex-col grow gap-y-2 pt-5">
         {quizzesInfo &&
           Object.entries(quizzesInfo).map(([courseName, info]) => (
-            <div>
+            <div key={courseName}>
               <h2 className="text-xl font-bold pb-3">{courseName}</h2>
               {info?.lectureInfo?.map((lecture) => (
                 <Link

@@ -93,6 +93,14 @@ export default function CreateQuizQuestionPage() {
       return;
     }
 
+    if (
+      new Set(possibleAnswers.map((answer) => answer.answerText)).size !==
+      possibleAnswers.length
+    ) {
+      setError("Different answers cannot have the same text.");
+      return;
+    }
+
     const url = questionId
       ? `${API_BASE_URL}/questions/${questionId}`
       : `${API_BASE_URL}/courses/${courseId}/lectures/${lectureId}/questions`;
@@ -108,7 +116,6 @@ export default function CreateQuizQuestionPage() {
       }),
     });
 
-    // TODO: Error management
     const data = await response.json();
     navigate(`/courses/${courseId}/lectures/${lectureId}/manageQuiz`);
   };
@@ -153,7 +160,7 @@ export default function CreateQuizQuestionPage() {
                       <input
                         type="text"
                         name={`answers[${index}][answerText]`}
-                        value={answer.answerText}
+                        value={answer.answerText || ""}
                         className="w-full rounded-md py-2 pl-1 pr-4 text-gray-900 ring-1 ring-gray-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-sky-400 dark:hover:bg-sky-900"
                         onChange={(e) => handleAnswerChange(index, e)}
                         required
@@ -172,7 +179,7 @@ export default function CreateQuizQuestionPage() {
                     <input
                       type="checkbox"
                       name={`answers[${index}][isCorrect]`}
-                      checked={answer.isCorrect}
+                      checked={answer.isCorrect || false}
                       className="mt-2 mr-2"
                       onChange={() => handleCheckboxChange(index)}
                     />

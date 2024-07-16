@@ -118,6 +118,7 @@ export default function QuizPage() {
             </h2>
             {questionData.possibleAnswers?.map((answer) => (
               <div
+                key={answer}
                 onClick={() =>
                   showingAnswer ? null : setSelectedAnswer(answer)
                 }
