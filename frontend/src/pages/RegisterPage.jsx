@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/UserContext";
 import ReCAPTCHA from "react-google-recaptcha";
 import { API_BASE_URL } from "../config";
@@ -15,6 +15,7 @@ const RegisterPage = () => {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,11 +57,14 @@ const RegisterPage = () => {
         throw new Error(data.message || "Registration failed");
       }
       login(data.token);
-      navigate("/dashboard");
+      const redirectTo = new URLSearchParams(location.search).get('redirect') || "/dashboard";
+      navigate(redirectTo);
     } catch (error) {
       setError(error.message);
     }
   };
+
+  const redirect = new URLSearchParams(location.search).get('redirect') || "";
 
   return (
     <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md dark:text-white dark:bg-slate-800">
@@ -152,7 +156,7 @@ const RegisterPage = () => {
         <p className="mt-4 text-center">
           Already have an account?{" "}
           <Link
-            to="/login"
+            to={`/login${redirect ? `?redirect=${redirect}` : ""}`}
             className="text-blue-500 hover:underline dark:text-blue-400"
           >
             Log in

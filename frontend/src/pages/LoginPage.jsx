@@ -60,6 +60,8 @@ const LoginPage = () => {
     }
   };
 
+  const redirect = new URLSearchParams(location.search).get('redirect') || "";
+
   return (
     <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md dark:text-white dark:bg-slate-800">
       <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
@@ -116,7 +118,7 @@ const LoginPage = () => {
         <p className="mt-4 text-center">
           Don't have an account?{" "}
           <Link
-            to="/register"
+            to={`/register${redirect ? `?redirect=${redirect}` : ""}`}
             className="text-blue-500 hover:underline dark:text-blue-400"
           >
             Register here
