@@ -149,14 +149,14 @@ export default function CreateQuizQuestionPage() {
               </label>
             </div>
             {possibleAnswers.map((answer, index) => (
-              <div key={`answer-${index}`} className="flex g-2">
+              <div key={`answer-${index}`} className="flex">
                 <div className="sm:col-span-4">
                   <label
                     htmlFor={`answers[${index}]`}
                     className="block text-sm font-medium leading-6 text-gray-900 dark:text-slate-200"
                   >
                     Answer {index}:
-                    <span className="flex gap-2 align-center">
+                    <span className="flex gap-2 w-fit align-center">
                       <input
                         type="text"
                         name={`answers[${index}][answerText]`}
