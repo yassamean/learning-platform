@@ -51,14 +51,14 @@ const CreatePasswordPage = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+    <div className="bg-white mt-10 p-8 rounded border mx-auto max-w-md dark:text-white dark:bg-slate-800">
       <h2 className="text-2xl font-bold mb-6 text-center">
         Create New Password
       </h2>
       {error && <p className="text-red-500">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="newPassword">
+          <label className="block text-gray-700 mb-2 dark:text-slate-200" htmlFor="newPassword">
             New Password
           </label>
           <input
@@ -67,13 +67,13 @@ const CreatePasswordPage = () => {
             name="newPassword"
             value={formData.newPassword}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded dark:text-black"
             required
           />
         </div>
         <div className="mb-4">
           <label
-            className="block text-gray-700 mb-2"
+            className="block text-gray-700 mb-2 dark:text-slate-200"
             htmlFor="confirmNewPassword"
           >
             Confirm New Password
@@ -84,7 +84,7 @@ const CreatePasswordPage = () => {
             name="confirmNewPassword"
             value={formData.confirmNewPassword}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded dark:text-black"
             required
           />
         </div>
