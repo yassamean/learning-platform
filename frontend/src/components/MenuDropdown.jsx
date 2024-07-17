@@ -163,9 +163,7 @@ export default function MenuDropdown() {
               ))}
               {user != null ? (
                 <NavLink
-                  onClick={() => {
-                    handleLogout;
-                  }}
+                  onClick={handleLogout}
                   key={"logout"}
                   className="group relative flex items-center gap-x-6 rounded-lg p-4 hover:bg-gray-200  dark:hover:bg-sky-900"
                 >
