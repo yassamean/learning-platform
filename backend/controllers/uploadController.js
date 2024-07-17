@@ -1,55 +1,30 @@
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
+import { put, del } from "@vercel/blob";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Define storage for the files
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = "uploads/";
-    // Create the directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir);
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname.replaceAll(" ", "-")}`);
-  },
-});
-
-const upload = multer({ storage });
-
-export const uploadFile = (req, res) => {
-  const baseUrl = process.env.BASE_URL || "http://localhost:3000";
-  // Upload function to handle single file upload
-  upload.single("file")(req, res, (err) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    if (!req.file) {
-      return res.status(400).send("No file uploaded.");
-    }
-    res.json({
-      message: "File uploaded successfully",
-      filePath: `${baseUrl}/uploads/${req.file.filename}`,
+export async function uploadFile(request, response) {
+  try {
+    const blob = await put(request.query.filename, request, {
+      access: "public",
     });
-  });
+    return response.status(200).json(blob);
+  } catch (error) {
+    console.error("Error creating blob", error);
+    response.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+  runtime: "edge",
 };
 
-export const deleteFile = (req, res) => {
-  const filePath = path.join(__dirname, "../uploads", req.params.filename);
-
-  fs.unlink(filePath, (err) => {
-    if (err) {
-      return res
-        .status(500)
-        .json({ error: "File deletion failed.", details: err.message });
-    }
-    res.json({ message: "File deleted successfully." });
-  });
-};
+export async function deleteFile(request, response) {
+  try {
+    await del(request.body.url);
+    return response.status(200).json({ message: "Successfully deleted file" });
+  } catch (error) {
+    console.error("Error deleting blob", error);
+    response.status(500).json({ message: "Internal server error" });
+  }
+}

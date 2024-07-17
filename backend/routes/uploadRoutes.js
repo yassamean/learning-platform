@@ -3,6 +3,6 @@ import { uploadFile, deleteFile } from "../controllers/uploadController.js";
 const router = Router();
 
 router.post("/upload", uploadFile);
-router.delete("/delete/:filename", deleteFile);
+router.delete("/delete", deleteFile);
 
 export default router;

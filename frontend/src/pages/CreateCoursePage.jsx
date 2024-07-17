@@ -242,7 +242,6 @@ export default function CreateCoursePage() {
                     type="text"
                     name="name"
                     id="name"
-                    required
                     value={form.name}
                     onChange={(e) => updateForm({ name: e.target.value })}
                     className="w-full rounded-md py-2 pl-1 pr-4 text-gray-900 ring-1 ring-gray-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-sky-400 dark:hover:bg-sky-900"

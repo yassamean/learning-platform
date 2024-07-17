@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import ReactPlayer from "react-player";
+import { BeatLoader } from "react-spinners";
 import { Worker } from "@react-pdf-viewer/core";
 import { Viewer } from "@react-pdf-viewer/core";
+import toast from "react-hot-toast";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 
 import {
@@ -13,14 +15,18 @@ import {
   FilmIcon,
   DocumentArrowUpIcon,
   DocumentPlusIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 
 export default function CreateLecturePage() {
   const navigate = useNavigate();
   const params = useParams();
 
-  const [error, setError] = useState("");
   const [videoUrlInput, setVideoUrlInput] = useState("");
+  const [loading, setLoading] = useState({
+    video: false,
+    pdf: false,
+  });
   const [pdfUrlInput, setPdfUrlInput] = useState("");
   const [isNew, setIsNew] = useState(true);
   const [form, setForm] = useState({
@@ -38,15 +44,17 @@ export default function CreateLecturePage() {
 
       if (file.size > 50 * 1024 * 1024) {
         // 50 MB size limit
-        setError("Video file size exceeds 50 MB");
+        toast.error("Video file size exceeds 5 MB");
         return;
       }
+      setVideoUrlInput("");
+      setLoading({ ...loading, video: true });
+      const blob = await handleFileUpload(file);
+      setLoading({ ...loading, video: false });
 
-      const fileUrl = await handleFileUpload(file);
-      // updateForm({ videoUrl: fileUrl });
-      setVideoUrlInput(fileUrl);
+      setVideoUrlInput(blob.url);
     },
-    [setForm, setVideoUrlInput, setError]
+    [setForm, setVideoUrlInput]
   );
 
   const onDropPdf = useCallback(
@@ -55,15 +63,17 @@ export default function CreateLecturePage() {
 
       if (file.size > 5 * 1024 * 1024) {
         // 5 MB size limit
-        setError("PDF file size exceeds 5 MB");
+        toast.error("PDF file size exceeds 5 MB");
         return;
       }
+      setPdfUrlInput("");
+      setLoading({ ...loading, pdf: true });
+      const blob = await handleFileUpload(file);
+      setLoading({ ...loading, pdf: false });
 
-      const fileUrl = await handleFileUpload(file);
-      // updateForm({ pdfUrl: fileUrl });
-      setPdfUrlInput(fileUrl);
+      setPdfUrlInput(blob.url);
     },
-    [setForm, setPdfUrlInput, setError]
+    [setForm, setPdfUrlInput]
   );
 
   const { getRootProps: getVideoRootProps, getInputProps: getVideoInputProps } =
@@ -90,12 +100,10 @@ export default function CreateLecturePage() {
 
   const videoUrlHandler = (value) => {
     setVideoUrlInput(value);
-    console.log(value);
   };
 
   const pdfUrlHandler = (value) => {
     setPdfUrlInput(value);
-    console.log(value);
   };
 
   useEffect(() => {
@@ -126,30 +134,30 @@ export default function CreateLecturePage() {
   }, [params.id, navigate]);
 
   async function handleFileUpload(file) {
-    const formData = new FormData();
-    formData.append("file", file);
+    const response = await fetch(
+      `${API_BASE_URL}/upload?filename=${file.name}`,
+      {
+        method: "POST",
+        body: file,
+      }
+    );
 
-    const response = await fetch(`${API_BASE_URL}/upload`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data.filePath;
-    } else {
-      console.error("Failed to upload file");
-    }
+    const newBlob = await response.json();
+    return newBlob;
   }
 
-  async function handleFileDelete(filename) {
-    const response = await fetch(`${API_BASE_URL}/delete/${filename}`, {
+  async function handleFileDelete(fileUrl) {
+    const response = await fetch(`${API_BASE_URL}/delete`, {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url: fileUrl }),
     });
 
     if (response.ok) {
       const data = await response.json();
-      // toast maybe?
+      toast.success("File deleted successfully");
     } else {
       console.error("Failed to delete file");
     }
@@ -160,13 +168,13 @@ export default function CreateLecturePage() {
     const lecture = { ...form };
     // delete files if changed
     if (videoUrlInput != lecture.videoUrl) {
-      lecture.videoUrl.startsWith(API_BASE_URL) &&
-        handleFileDelete(lecture.videoUrl.split("/").pop());
+      lecture.videoUrl.includes("public.blob.vercel-storage.com") &&
+        handleFileDelete(lecture.videoUrl);
       lecture.videoUrl = videoUrlInput;
     }
     if (pdfUrlInput != lecture.pdfUrl) {
-      lecture.pdfUrl.startsWith(API_BASE_URL) &&
-        handleFileDelete(lecture.pdfUrl.split("/").pop());
+      lecture.pdfUrl.includes("public.blob.vercel-storage.com") &&
+        handleFileDelete(lecture.pdfUrl);
       lecture.pdfUrl = pdfUrlInput;
     }
     try {
@@ -270,15 +278,54 @@ export default function CreateLecturePage() {
               >
                 Lecture video
               </label>
-              <div className="flex flex-col sm:flex-row gap-4">
-                {videoUrlInput && (
-                  <div className="mt-2 aspect-video w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
-                    <ReactPlayer
-                      width="100%"
-                      height="100%"
-                      controls={true}
-                      url={videoUrlInput}
-                    ></ReactPlayer>
+              <div className="flex flex-col md:flex-row gap-4">
+                {(loading.video || videoUrlInput) && (
+                  <div className="relative flex flex-col items-center justify-center mt-2 aspect-video md:w-1/2 lg:w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
+                    <div
+                      className={`absolute z-10 top-0 left-1 text-sm font-medium ${
+                        !videoUrlInput
+                          ? "text-gray-900 dark:text-slate-200"
+                          : "text-slate-200"
+                      } `}
+                    >
+                      Preview
+                    </div>
+                    {videoUrlInput.includes(
+                      "public.blob.vercel-storage.com"
+                    ) && (
+                      <div
+                        onClick={() => {
+                          handleFileDelete(videoUrlInput);
+                          setVideoUrlInput("");
+                        }}
+                        className="absolute z-10 top-1 right-1 cursor-pointer"
+                      >
+                        <TrashIcon className="size-5 text-gray-900 dark:text-slate-200 hover:text-red-500"></TrashIcon>
+                      </div>
+                    )}
+                    <BeatLoader
+                      color="#e2e8f0"
+                      size="20"
+                      loading={loading.video}
+                    />
+                    {loading.video && (
+                      <>
+                        <div className="text-sm font-medium pt-5 text-gray-900 dark:text-slate-200">
+                          Uploading...
+                        </div>
+                        <div className="text-sm font-light text-gray-900 dark:text-slate-200">
+                          Creating Blob, this can take a while
+                        </div>
+                      </>
+                    )}
+                    {videoUrlInput && (
+                      <ReactPlayer
+                        width="100%"
+                        height="100%"
+                        controls={true}
+                        url={videoUrlInput}
+                      ></ReactPlayer>
+                    )}
                   </div>
                 )}
                 <div className="grow">
@@ -336,7 +383,7 @@ export default function CreateLecturePage() {
               >
                 Lecture PDF
               </label>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col md:flex-row gap-4">
                 <div className="grow">
                   <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10 dark:border-slate-400 dark:bg-slate-800">
                     <div {...getPdfRootProps()} className="text-center">
@@ -382,11 +429,48 @@ export default function CreateLecturePage() {
                     />
                   </div>
                 </div>
-                {pdfUrlInput && (
-                  <div className="mt-2 aspect-video w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
-                    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-                      <Viewer fileUrl={pdfUrlInput} />
-                    </Worker>
+                {(loading.pdf || pdfUrlInput) && (
+                  <div className="relative flex flex-col items-center justify-center mt-2 aspect-video md:w-1/2 lg:w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
+                    <div
+                      className={`absolute z-10 top-0 left-1 text-sm font-medium ${
+                        !pdfUrlInput
+                          ? "text-gray-900 dark:text-slate-200"
+                          : "text-gray-900"
+                      } `}
+                    >
+                      Preview
+                    </div>
+                    {pdfUrlInput.includes("public.blob.vercel-storage.com") && (
+                      <div
+                        onClick={() => {
+                          handleFileDelete(pdfUrlInput);
+                          setPdfUrlInput("");
+                        }}
+                        className="absolute z-10 top-1 right-5 cursor-pointer"
+                      >
+                        <TrashIcon className="size-5 text-gray-900 hover:text-red-500"></TrashIcon>
+                      </div>
+                    )}
+                    <BeatLoader
+                      color="#e2e8f0"
+                      size="20"
+                      loading={loading.pdf}
+                    />
+                    {loading.pdf && (
+                      <>
+                        <div className="text-sm font-medium pt-5 text-gray-900 dark:text-slate-200">
+                          Uploading...
+                        </div>
+                        <div className="text-sm font-light text-gray-900 dark:text-slate-200">
+                          Creating Blob, this can take a while
+                        </div>
+                      </>
+                    )}
+                    {pdfUrlInput && (
+                      <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+                        <Viewer fileUrl={pdfUrlInput} />
+                      </Worker>
+                    )}
                   </div>
                 )}
               </div>
