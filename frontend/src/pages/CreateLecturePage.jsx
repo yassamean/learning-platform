@@ -320,7 +320,7 @@ export default function CreateLecturePage() {
                     )}
                     <BeatLoader
                       color="#e2e8f0"
-                      size="20"
+                      size="20px"
                       loading={loading.video}
                     />
                     {loading.video && (
@@ -466,7 +466,7 @@ export default function CreateLecturePage() {
                     )}
                     <BeatLoader
                       color="#e2e8f0"
-                      size="20"
+                      size="20px"
                       loading={loading.pdf}
                     />
                     {loading.pdf && (
