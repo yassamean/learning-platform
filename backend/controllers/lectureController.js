@@ -2,6 +2,7 @@ import { Lecture } from "../models/lecture.js";
 import { QuizQuestion } from "../models/quizQuestion.js";
 import { UserData } from "../models/userData.js";
 import { Comment } from "../models/comment.js";
+import { Course } from "../models/course.js";
 import { del } from "@vercel/blob";
 
 export async function getLecturesByCourse(req, res) {
@@ -44,6 +45,11 @@ export async function setLecture(req, res) {
       pdfUrl: req.body.pdfUrl,
     });
     res.status(200).json(lecture);
+
+    // set updatedat value of course to new date when lecture gets created
+    const course = await Course.findById(lecture.courseId);
+    course.updatedAt = new Date();
+    await course.save();
   } catch (error) {
     console.error("Error setting lecture:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -60,6 +66,10 @@ export async function updateLecture(req, res) {
       (lecture.pdfUrl = req.body.pdfUrl),
       lecture.save();
     res.status(200).json(lecture);
+    // set updatedat value of course to new date when lecture gets created
+    const course = await Course.findById(lecture.courseId);
+    course.updatedAt = new Date();
+    await course.save();
   } catch (error) {
     console.error("Error updating lecture:", error);
     res.status(500).json({ message: "Internal server error" });

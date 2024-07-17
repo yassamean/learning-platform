@@ -1,5 +1,4 @@
 import { model, Schema } from "mongoose";
-import { Course } from "./course.js";
 
 const LectureSchema = new Schema(
   {
@@ -13,17 +12,6 @@ const LectureSchema = new Schema(
   },
   { timestamps: true }
 );
-
-// set updatedat value of course to new date when lecture gets saved
-LectureSchema.pre("save", async function (next) {
-  const lecture = this;
-  // Check if the course already exists
-  const course = await Course.findById(lecture.courseId);
-  course.updatedAt = new Date();
-  await course.save();
-
-  next();
-});
 
 LectureSchema.virtual("questionCount", {
   ref: "QuizQuestion",
