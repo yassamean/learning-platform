@@ -1,4 +1,5 @@
 import { Lecture } from "../models/lecture.js";
+import { QuizQuestion } from "../models/quizQuestion.js";
 
 export async function getLecturesByCourse(req, res) {
   try {
@@ -18,7 +19,11 @@ export async function getLectureById(req, res) {
   const lectureId = req.params.lectureId;
   try {
     const lecture = await Lecture.findById(lectureId);
-    res.status(200).json(lecture);
+    const quizQuestions = await QuizQuestion.find({ lectureId });
+    res.status(200).json({
+      ...lecture.toJSON(),
+      hasQuiz: quizQuestions.length > 0,
+    });
   } catch (error) {
     console.error("Error fetching lecture:", error);
     res.status(500).json({ message: "Internal server error" });

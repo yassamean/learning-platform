@@ -48,7 +48,7 @@ export default function QuizPage() {
         ? "border-green-500 bg-green-500 text-white hover:border-green-500"
         : "border-red-500 bg-red-500 text-white hover:border-red-500";
     } else {
-      return answer === lastQuestionResult?.correctAnswer
+      return lastQuestionResult?.correctAnswers?.includes(answer)
         ? "border-green-500 hover:border-green-500"
         : "hover:border-gray-200";
     }
@@ -90,6 +90,7 @@ export default function QuizPage() {
     );
     const responseData = await response.json();
     setLastQuestionResult(responseData);
+    console.log(responseData);
     setShowingAnswer(true);
   };
 

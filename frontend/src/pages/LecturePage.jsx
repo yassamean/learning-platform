@@ -144,7 +144,7 @@ const LecturePage = () => {
             </Link>
           </div>
         )}
-        {["student"].includes(user.role) && (
+        {lecture.hasQuiz && ["student"].includes(user.role) && (
           <div className="flex items-end gap-2">
             <Link
               to={`/courses/${params.courseId}/lectures/${params.lectureId}/quiz`}
