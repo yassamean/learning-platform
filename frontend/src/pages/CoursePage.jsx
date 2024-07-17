@@ -16,6 +16,7 @@ import { Link, useParams } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import VideoCard from "../components/VideoCard";
 import { formatDistanceToNow } from "date-fns";
+import { Tooltip } from "react-tooltip";
 
 function CoursePage() {
   const params = useParams();
@@ -138,20 +139,31 @@ function CoursePage() {
           {["teacher", "admin"].includes(user.role) && (
             <>
               <Link to={`/courses/${courseId}/edit`} className="">
-                <PencilSquareIcon className="size-8 dark:text-slate-200"></PencilSquareIcon>
+                <PencilSquareIcon className="editCourseButton size-8 dark:text-slate-200"></PencilSquareIcon>
+                <Tooltip anchorSelect=".editCourseButton">
+                  Edit course data
+                </Tooltip>
               </Link>
               <Link to={`/courses/${courseId}/lectures/create`}>
-                <PlusCircleIcon className="size-8 dark:text-slate-200"></PlusCircleIcon>
+                <PlusCircleIcon className="addLectureButton size-8 dark:text-slate-200"></PlusCircleIcon>
+                <Tooltip anchorSelect=".addLectureButton">
+                  Create a new lecture
+                </Tooltip>
               </Link>
             </>
           )}
           {isEnrolled && (
-            <button>
-              <ArrowLeftStartOnRectangleIcon
-                className="size-8 text-red-500"
-                onClick={deleteEnrollment}
-              ></ArrowLeftStartOnRectangleIcon>
-            </button>
+            <>
+              <button className="deleteEnrollmentButton">
+                <ArrowLeftStartOnRectangleIcon
+                  className="size-8 text-red-500"
+                  onClick={deleteEnrollment}
+                ></ArrowLeftStartOnRectangleIcon>
+              </button>
+              <Tooltip anchorSelect=".deleteEnrollmentButton">
+                Revoke enrollment
+              </Tooltip>
+            </>
           )}
         </div>
       </div>

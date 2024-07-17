@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import { useAuth } from "../context/UserContext";
+import { Tooltip } from "react-tooltip";
 
 export default function CourseListPage({ search }) {
   const [courses, setCourses] = useState(null);
@@ -60,7 +61,10 @@ export default function CourseListPage({ search }) {
         <div>
           {["teacher", "admin"].includes(user.role) && (
             <Link to="/courses/create">
-              <PlusCircleIcon className="size-8 dark:text-slate-200"></PlusCircleIcon>
+              <PlusCircleIcon className="addCourseButton size-8 dark:text-slate-200"></PlusCircleIcon>
+              <Tooltip anchorSelect=".addCourseButton">
+                Create a new course
+              </Tooltip>
             </Link>
           )}
         </div>

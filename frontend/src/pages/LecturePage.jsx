@@ -11,6 +11,7 @@ import {
 import CommentSection from "../components/CommentSection";
 import ReactPlayer from "react-player";
 import PDFViewer from "../components/PdfViewer";
+import { Tooltip } from "react-tooltip";
 
 const LecturePage = () => {
   const { user } = useAuth();
@@ -119,7 +120,7 @@ const LecturePage = () => {
 
           {user.role === "teacher" ? (
             <Link
-              className="flex gap-2 place-items-center"
+              className="flex gap-2 place-items-center dark:text-slate-200"
               to={`/courses/${courseId}/lectures/${params.lectureId.toString()}/manageQuiz`}
             >
               <ListBulletIcon className="size-8 dark:text-slate-200" />
@@ -140,7 +141,10 @@ const LecturePage = () => {
               to={`/courses/${courseId}/lectures/${params.lectureId.toString()}/edit`}
               className=""
             >
-              <PencilSquareIcon className="size-8 dark:text-slate-200"></PencilSquareIcon>
+              <PencilSquareIcon className="editLectureButton size-8 dark:text-slate-200"></PencilSquareIcon>
+              <Tooltip anchorSelect=".editLectureButton">
+                Edit lecture data
+              </Tooltip>
             </Link>
           </div>
         )}
