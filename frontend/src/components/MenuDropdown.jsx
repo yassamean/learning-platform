@@ -45,11 +45,11 @@ const studentOptions = [
     href: "/quizzes",
     icon: PuzzlePieceIcon,
   },
-  {
-    name: "Settings",
-    href: "/me",
-    icon: Cog6ToothIcon,
-  },
+  // {
+  //   name: "Settings",
+  //   href: "/me",
+  //   icon: Cog6ToothIcon,
+  // },
 ];
 
 // We should keep track of what courses each teacher
@@ -67,11 +67,11 @@ const teacherOptions = [
     href: "/courses",
     icon: FolderOpenIcon,
   },
-  {
-    name: "Settings",
-    href: "/me",
-    icon: Cog6ToothIcon,
-  },
+  // {
+  //   name: "Settings",
+  //   href: "/me",
+  //   icon: Cog6ToothIcon,
+  // },
 ];
 
 const adminOptions = [
@@ -85,11 +85,11 @@ const adminOptions = [
     href: "/courses",
     icon: FolderOpenIcon,
   },
-  {
-    name: "Settings",
-    href: "/me",
-    icon: Cog6ToothIcon,
-  },
+  // {
+  //   name: "Settings",
+  //   href: "/me",
+  //   icon: Cog6ToothIcon,
+  // },
 ];
 
 function getOptions(user) {

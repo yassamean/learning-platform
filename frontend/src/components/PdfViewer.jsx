@@ -34,19 +34,20 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
     </div>
   );
 
+  const addNote = (props) => {
+    if (props.selectedText !== "") {
+      const note = {
+        id: ++noteId,
+        highlightAreas: props.highlightAreas,
+        quote: props.selectedText,
+      };
+      setHighlightedText([...highlightedText, note]);
+      props.cancel();
+    }
+  };
+
   const renderHighlightContent = (props) => {
-    const addNote = () => {
-      if (props.selectedText !== "") {
-        const note = {
-          id: ++noteId,
-          highlightAreas: props.highlightAreas,
-          quote: props.selectedText,
-        };
-        setHighlightedText([...highlightedText, note]);
-        props.cancel();
-      }
-    };
-    addNote();
+    addNote(props);
   };
 
   const jumpToNote = (note, index) => {
@@ -93,11 +94,11 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
 
   const { jumpToHighlightArea } = highlightPluginInstance;
 
-  useEffect(() => {
-    return () => {
-      noteEles.clear();
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     noteEles.clear();
+  //   };
+  // }, []);
 
   const deleteHighlight = (index) => {
     setHighlightedText(highlightedText.filter((elmt, idx) => idx !== index));

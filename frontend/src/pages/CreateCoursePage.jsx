@@ -51,13 +51,7 @@ export default function CreateCoursePage() {
   ];
 
   const isValid = () => {
-    return (
-      form.name &&
-      form.semester &&
-      form.studyProgram &&
-      form.lecturedBy &&
-      form.isOpenToEnroll
-    );
+    return form.name && form.semester && form.studyProgram && form.lecturedBy;
   };
 
   const onDrop = useCallback((acceptedFiles) => {

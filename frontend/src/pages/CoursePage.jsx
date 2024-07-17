@@ -115,7 +115,11 @@ function CoursePage() {
     }
   }
 
-  return isEnrolled ? (
+  return !course ? (
+    <div className="pt-6 dark:text-slate-200">
+      <p>Loading Coursepage...</p>
+    </div>
+  ) : isEnrolled ? (
     <>
       <div className="flex justify-between">
         <div>
