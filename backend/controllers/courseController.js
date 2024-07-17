@@ -1,4 +1,5 @@
 import { Course, User } from "../models/index.js";
+import { Lecture } from "../models/index.js";
 
 export async function getCourses(req, res) {
   try {
@@ -67,5 +68,35 @@ export async function updateCourse(req, res) {
   } catch (error) {
     console.error("Error updating course:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function deleteCourse(req, res) {
+  try {
+    const courseId = req.params.courseId;
+    const course = await Course.findByIdAndDelete(courseId);
+    const lectures = await Lecture.find({ courseId: course._id });
+    for (let lecture of lectures) {
+      const lect = await Lecture.findByIdAndDelete(lecture._id);
+
+      if (!lect) {
+        return res.status(404).json({ message: "Lecture not found" });
+      }
+      await UserData.updateMany(
+        {},
+        { $pull: { lectureData: { lectureId: lect._id } } }
+      );
+      await Comment.deleteMany({ lectureId: lect._id });
+      if (lect.videoUrl.includes("public.blob.vercel-storage.com")) {
+        await del(lect.videoUrl);
+      }
+      if (lect.pdfUrl.includes("public.blob.vercel-storage.com")) {
+        await del(lect.pdfUrl);
+      }
+    }
+
+    res.status(200).json({ message: "Course deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
   }
 }

@@ -1,5 +1,8 @@
 import { Lecture } from "../models/lecture.js";
 import { QuizQuestion } from "../models/quizQuestion.js";
+import { UserData } from "../models/userData.js";
+import { Comment } from "../models/comment.js";
+import { del } from "@vercel/blob";
 
 export async function getLecturesByCourse(req, res) {
   try {
@@ -60,6 +63,32 @@ export async function updateLecture(req, res) {
   } catch (error) {
     console.error("Error updating lecture:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function deleteLecture(req, res) {
+  const id = req.params.lectureId;
+  try {
+    const lecture = await Lecture.findByIdAndDelete(id);
+
+    if (!lecture) {
+      return res.status(404).json({ message: "Lecture not found" });
+    }
+    await UserData.updateMany(
+      {},
+      { $pull: { lectureData: { lectureId: id } } }
+    );
+    await Comment.deleteMany({ lectureId: id });
+    if (lecture.videoUrl.includes("public.blob.vercel-storage.com")) {
+      await del(lecture.videoUrl);
+    }
+    if (lecture.pdfUrl.includes("public.blob.vercel-storage.com")) {
+      await del(lecture.pdfUrl);
+    }
+
+    res.status(200).json({ message: "Lecture deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
   }
 }
 

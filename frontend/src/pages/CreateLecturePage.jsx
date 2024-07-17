@@ -163,6 +163,23 @@ export default function CreateLecturePage() {
     }
   }
 
+  async function deleteLecture(e) {
+    e.preventDefault();
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/courses/${params.courseId}/lectures/${params.lectureId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      navigate(`/courses/${params.courseId}`);
+    } catch (error) {
+      console.error("A problem occurred with your fetch operation: ", error);
+    } finally {
+      navigate("/courses");
+    }
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
     const lecture = { ...form };
@@ -282,11 +299,9 @@ export default function CreateLecturePage() {
                 {(loading.video || videoUrlInput) && (
                   <div className="relative flex flex-col items-center justify-center mt-2 aspect-video md:w-1/2 lg:w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
                     <div
-                      className={`absolute z-10 top-0 left-1 text-sm font-medium ${
-                        !videoUrlInput
-                          ? "text-gray-900 dark:text-slate-200"
-                          : "text-slate-200"
-                      } `}
+                      className={
+                        "absolute z-10 px-2 top-2 left-2 text-sm font-medium bg-white dark:bg-slate-700 dark:text-slate-200 rounded lg"
+                      }
                     >
                       Preview
                     </div>
@@ -432,11 +447,9 @@ export default function CreateLecturePage() {
                 {(loading.pdf || pdfUrlInput) && (
                   <div className="relative flex flex-col items-center justify-center mt-2 aspect-video md:w-1/2 lg:w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
                     <div
-                      className={`absolute z-10 top-0 left-1 text-sm font-medium ${
-                        !pdfUrlInput
-                          ? "text-gray-900 dark:text-slate-200"
-                          : "text-gray-900"
-                      } `}
+                      className={
+                        "absolute z-10 px-2 top-2 left-2 text-sm font-medium bg-white dark:bg-slate-700 dark:text-slate-200 rounded lg"
+                      }
                     >
                       Preview
                     </div>
@@ -478,7 +491,18 @@ export default function CreateLecturePage() {
           </div>
         </div>
       </div>
-      <div className="mt-6 flex items-center justify-end gap-x-6">
+      <div className="mt-6 flex items-center justify-between gap-x-6">
+        {!isNew ? (
+          <button
+            onClick={(e) => deleteLecture(e)}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 dark:text-slate-200 shadow-sm dark:hover:bg-sky-900 hover:text-red-600 hover:bg-gray-300"
+          >
+            <TrashIcon className="size-8"></TrashIcon>
+            Delete
+          </button>
+        ) : (
+          <div></div>
+        )}
         <button
           type="submit"
           className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 dark:text-slate-200 shadow-sm dark:hover:bg-sky-900 dark:hover:text-sky-400 hover:bg-gray-300"

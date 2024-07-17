@@ -7,6 +7,7 @@ import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import {
   ArrowUpOnSquareIcon,
   FolderPlusIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 
 export default function CreateCoursePage() {
@@ -180,6 +181,22 @@ export default function CreateCoursePage() {
     fetchCourse();
     return;
   }, [params.id, navigate]);
+
+  async function deleteCourse(e) {
+    e.preventDefault();
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/courses/${params.courseId}`,
+        {
+          method: "DELETE",
+        }
+      );
+    } catch (error) {
+      console.error("A problem occurred with your fetch operation: ", error);
+    } finally {
+      navigate("/courses");
+    }
+  }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -494,7 +511,18 @@ export default function CreateCoursePage() {
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-end gap-x-6">
+      <div className="mt-6 flex items-center justify-between gap-x-6">
+        {!isNew ? (
+          <button
+            onClick={(e) => deleteCourse(e)}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 dark:text-slate-200 shadow-sm dark:hover:bg-sky-900 hover:text-red-600 hover:bg-gray-300"
+          >
+            <TrashIcon className="size-8"></TrashIcon>
+            Delete
+          </button>
+        ) : (
+          <div></div>
+        )}
         <button
           disabled={!isValid()}
           type="submit"
