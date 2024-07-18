@@ -16,7 +16,9 @@ export default function QuizCourseListPage() {
   const [courseQuizInfo, setCourseQuizInfo] = useState({});
   const [dataLoaded, setDataLoaded] = useState(false);
 
-  const noLectures = dataLoaded && courseQuizInfo?.lectureInfo?.length === 0;
+  const noLectures =
+    (dataLoaded && courseQuizInfo?.lectureInfo === null) ||
+    courseQuizInfo?.lectureInfo?.length === 0;
   const noLecturesMessage =
     user.role === "student"
       ? "No quizzes available. Watch a lecture to unlock the lecture's quiz (note: some lectures may not have an accompanying quiz)."

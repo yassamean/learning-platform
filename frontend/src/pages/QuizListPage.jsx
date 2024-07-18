@@ -10,6 +10,13 @@ export default function QuizListPage() {
   const [quizzesInfo, setQuizzesInfo] = useState({});
   const [dataLoaded, setDataLoaded] = useState(false);
 
+  const noQuizzes =
+    dataLoaded &&
+    (Object.keys(quizzesInfo).length === 0 ||
+      Object.values(quizzesInfo).every(
+        ({ lectureInfo }) => lectureInfo.length === 0
+      ));
+
   const noQuizzesMessage =
     user.role === "teacher"
       ? "You don't seem to be teaching any courses, or your courses don't contain any lectures. Create a lecture so you can begin adding Quiz questions."
@@ -39,9 +46,7 @@ export default function QuizListPage() {
           Quizzes Overview
         </h1>
       </div>
-      {dataLoaded && Object.keys(quizzesInfo).length === 0 && (
-        <p className="mt-2">{noQuizzesMessage}</p>
-      )}
+      {dataLoaded && noQuizzes && <p className="mt-2">{noQuizzesMessage}</p>}
       {!dataLoaded && (
         <p className="mt-2 dark:text-white">Loading quizzes...</p>
       )}
