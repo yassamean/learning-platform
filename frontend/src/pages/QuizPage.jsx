@@ -17,7 +17,7 @@ export default function QuizPage() {
 
   const [questionData, setQuestionData] = useState(null);
   const [lectureName, setLectureName] = useState(null);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [selectedAnswers, setSelectedAnswers] = useState([]);
   const [showingAnswer, setShowingAnswer] = useState(false);
   const [lastQuestionResult, setLastQuestionResult] = useState(null);
 
@@ -37,14 +37,14 @@ export default function QuizPage() {
   const answerColorClasses = (answer) => {
     // During answer selection
     if (!showingAnswer) {
-      return answer === selectedAnswer
-        ? "border-blue-500 hover:border-color"
+      return selectedAnswers.includes(answer)
+        ? "border-blue-500 bg-blue-200 dark:bg-blue-500 hover:border-color"
         : "";
     }
 
     // After answer submission
-    if (answer === selectedAnswer) {
-      return lastQuestionResult?.answeredCorrectly
+    if (selectedAnswers.includes(answer)) {
+      return lastQuestionResult?.correctAnswers?.includes(answer)
         ? "border-green-500 bg-green-500 text-white hover:border-green-500"
         : "border-red-500 bg-red-500 text-white hover:border-red-500";
     } else {
@@ -56,7 +56,7 @@ export default function QuizPage() {
 
   const resetState = () => {
     setQuestionData(null);
-    setSelectedAnswer(null);
+    setSelectedAnswers([]);
     setLastQuestionResult(null);
     setShowingAnswer(false);
   };
@@ -85,7 +85,7 @@ export default function QuizPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ answer: selectedAnswer }),
+        body: JSON.stringify({ answers: selectedAnswers }),
       }
     );
     const responseData = await response.json();
@@ -118,9 +118,12 @@ export default function QuizPage() {
                 <p className="p-2 text-xs">{questionData.questionType}</p>
               </div>
 
-              <h2 className="text-2xl font-semibold text-center mb-3">
+              <h2 className="text-2xl font-semibold text-center">
                 {questionData.questionText}
               </h2>
+              <p className="text-small italic mb-3">
+                Select all correct answers.
+              </p>
               <div
                 className={
                   questionData?.possibleAnswers?.length > 3
@@ -132,7 +135,15 @@ export default function QuizPage() {
                   <div
                     key={answer}
                     onClick={() =>
-                      showingAnswer ? null : setSelectedAnswer(answer)
+                      showingAnswer
+                        ? null
+                        : setSelectedAnswers(
+                            selectedAnswers.includes(answer)
+                              ? selectedAnswers.filter(
+                                  (selectedAnswer) => selectedAnswer !== answer
+                                )
+                              : [...selectedAnswers, answer]
+                          )
                     }
                     className={`rounded-lg border-2 text-center w-38 p-4 m-3 hover:border-blue-500 ${
                       showingAnswer ? "" : "hover:cursor-pointer"
@@ -143,12 +154,20 @@ export default function QuizPage() {
                 ))}
               </div>
 
+              {showingAnswer && (
+                <p className="text-sm italic">
+                  {lastQuestionResult?.answeredCorrectly
+                    ? "That's right!"
+                    : "Sorry, that's incorrect."}
+                </p>
+              )}
+
               {!showingAnswer && (
                 <button
                   type="button"
                   className="inline-block mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 hover:cursor-pointer disabled:bg-blue-600 disabled:cursor-not-allowed"
                   onClick={() => handleSubmitAnswer()}
-                  disabled={!selectedAnswer}
+                  disabled={selectedAnswers.length === 0}
                 >
                   Submit
                 </button>
