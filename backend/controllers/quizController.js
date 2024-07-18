@@ -154,20 +154,18 @@ export async function submitStudentAnswer(req, res) {
   try {
     const questionId = req.params.questionId;
     const studentId = req.query.userId;
-    const studentAnswer = req.body.answer;
+    const studentAnswer = req.body.answers;
 
     const question = await QuizQuestion.findById(questionId);
     if (!question) {
       throw new Error(`Question with ID ${questionId} not found`);
     }
 
-    const correctAnswers = question.possibleAnswers.filter(
-      (answer) => answer.isCorrect
-    );
+    const correctAnswers = question.possibleAnswers
+      .filter((answer) => answer.isCorrect)
+      .map((answer) => answer.answerText);
 
-    const answeredCorrectly = correctAnswers
-      .map((answer) => answer.answerText)
-      .includes(studentAnswer);
+    const answeredCorrectly = arraysAreEqual(correctAnswers, studentAnswer);
 
     await QuizStudentAnswer.create({
       lectureId: question.lectureId,
@@ -176,12 +174,10 @@ export async function submitStudentAnswer(req, res) {
       answeredCorrectly,
     });
 
-    res
-      .status(200)
-      .json({
-        answeredCorrectly,
-        correctAnswers: correctAnswers.map((answer) => answer.answerText),
-      });
+    res.status(200).json({
+      answeredCorrectly,
+      correctAnswers,
+    });
   } catch (error) {
     console.error("Error submitting answer for student", error);
     res.status(500).json({ message: "Internal server error" });
@@ -448,4 +444,12 @@ function sortQuestionByCreatedAt(questionA, questionB) {
   }
 
   return 0;
+}
+
+function arraysAreEqual(arr1, arr2) {
+  return (
+    arr1.length === arr2.length &&
+    arr1.every((value) => arr2.includes(value)) &&
+    arr2.every((value) => arr1.includes(value))
+  );
 }
