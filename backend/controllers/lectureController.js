@@ -9,7 +9,7 @@ export async function getLecturesByCourse(req, res) {
   try {
     const lectures = await Lecture.find({ courseId: req.params.courseId }).sort(
       {
-        updatedAt: -1,
+        createdAt: -1,
       }
     );
     res.status(200).json(lectures);

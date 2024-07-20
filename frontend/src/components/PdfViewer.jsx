@@ -1,34 +1,50 @@
-import { useRef, useEffect } from "react";
-import { Button, Tooltip, Viewer, Worker } from "@react-pdf-viewer/core";
+import { useRef, useState, useEffect } from "react";
+import {
+  Button,
+  Tooltip,
+  Position,
+  Viewer,
+  Worker,
+} from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
-import { highlightPlugin } from "@react-pdf-viewer/highlight";
+import { highlightPlugin, MessageIcon } from "@react-pdf-viewer/highlight";
 
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { PencilIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
-const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
+const PdfViewer = ({
+  pdfUrl,
+  highlightedText,
+  setHighlightedText,
+  userInteraction,
+  setUserInteraction,
+}) => {
   const notesContainerRef = useRef(null);
   let noteId = highlightedText.length;
   const noteEles = new Map();
 
   const renderHighlightTarget = (props) => (
     <div
-      className="flex absolute"
       style={{
+        background: "#eee",
+        display: "flex",
+        position: "absolute",
         left: `${props.selectionRegion.left}%`,
         top: `${props.selectionRegion.top + props.selectionRegion.height}%`,
+        height: "31px",
         transform: "translate(0, 8px)",
-        zIndex: 10,
+        zIndex: 1,
       }}
     >
       <Tooltip
+        position={Position.TopCenter}
         target={
-          <Button onClick={props.toggle}>
+          <Button onClick={() => addNote(props)} style={{ height: 0 }}>
             <PencilIcon className="size-5"></PencilIcon>
           </Button>
         }
-        content={() => <div className="text-nowrap">Add a note</div>}
+        content={() => <div style={{ width: "150px" }}>Highlight Text</div>}
         offset={{ left: 0, top: -8 }}
       />
     </div>
@@ -42,22 +58,8 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
         quote: props.selectedText,
       };
       setHighlightedText([...highlightedText, note]);
+      !userInteraction && setUserInteraction(true);
       props.cancel();
-    }
-  };
-
-  const renderHighlightContent = (props) => {
-    addNote(props);
-  };
-
-  const jumpToNote = (note, index) => {
-    activateTab(3);
-    const notesContainer = notesContainerRef.current;
-    if (noteEles.has(index) && notesContainer) {
-      // if (noteEles.has(note.id) && notesContainer) {
-      notesContainer.scrollTop = noteEles
-        .get(index)
-        .getBoundingClientRect().top;
     }
   };
 
@@ -78,7 +80,6 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
                   },
                   props.getCssProperties(area, props.rotation)
                 )}
-                onClick={() => jumpToNote(note, index)}
               />
             ))}
         </div>
@@ -88,20 +89,14 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
 
   const highlightPluginInstance = highlightPlugin({
     renderHighlightTarget,
-    renderHighlightContent,
     renderHighlights,
   });
 
   const { jumpToHighlightArea } = highlightPluginInstance;
 
-  // useEffect(() => {
-  //   return () => {
-  //     noteEles.clear();
-  //   };
-  // }, []);
-
   const deleteHighlight = (index) => {
     setHighlightedText(highlightedText.filter((elmt, idx) => idx !== index));
+    !userInteraction && setUserInteraction(true);
   };
 
   const sidebarNotes = (
@@ -201,7 +196,7 @@ const PdfViewer = ({ pdfUrl, highlightedText, setHighlightedText }) => {
   });
 
   return (
-    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+    <Worker workerUrl="/pdf-worker/pdf.worker.min.js">
       <Viewer
         theme={{
           theme: localStorage.getItem("darkMode") === "true" ? "dark" : "light",

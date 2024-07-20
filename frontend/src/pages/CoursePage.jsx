@@ -12,7 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/UserContext";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import VideoCard from "../components/VideoCard";
 import { formatDistanceToNow } from "date-fns";
@@ -21,9 +21,10 @@ import { Tooltip } from "react-tooltip";
 function CoursePage() {
   const params = useParams();
   const { user } = useAuth();
-  const [course, setCourse] = useState({});
+  const [course, setCourse] = useState(null);
   const [lectures, setLectures] = useState([]);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const navigate = useNavigate();
 
   const courseId = params.courseId.toString();
 
@@ -45,7 +46,7 @@ function CoursePage() {
       setIsEnrolled(true);
       getLectures();
     }
-  }, [isEnrolled]);
+  }, []);
 
   async function getLectures() {
     try {
@@ -112,6 +113,8 @@ function CoursePage() {
       setIsEnrolled(false);
     } catch (error) {
       console.error("Error during enrollment deletion:", error);
+    } finally {
+      navigate("/courses");
     }
   }
 

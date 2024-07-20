@@ -15,22 +15,10 @@ export default function VideoCard(params) {
               params.data.videoUrl.includes("youtu") ? (
                 true
               ) : (
-                <ReactPlayer
-                  width="100%"
-                  height="100%"
-                  url={
-                    params.data.videoUrl
-                      ? params.data.videoUrl
-                      : "/uploads/videos/example.mp4"
-                  }
-                ></ReactPlayer>
+                <video src={params.data.videoUrl}></video>
               )
             }
-            url={
-              params.data.videoUrl
-                ? params.data.videoUrl
-                : "/uploads/videos/example.mp4"
-            }
+            url={params.data.videoUrl}
           ></ReactPlayer>
         </div>
         <div className="line-clamp-2 font-bold dark:text-slate-200 group-hover:dark:text-sky-400">
@@ -39,7 +27,7 @@ export default function VideoCard(params) {
         <div className="flex justify-between text-sm dark:text-slate-400">
           <div>Views: {params.data.views}</div>
           <div>
-            {formatDistanceToNow(new Date(params.data.updatedAt), {
+            {formatDistanceToNow(new Date(params.data.createdAt), {
               addSuffix: true,
             })}
           </div>

@@ -12,6 +12,7 @@ import CommentSection from "../components/CommentSection";
 import ReactPlayer from "react-player";
 import PDFViewer from "../components/PdfViewer";
 import { Tooltip } from "react-tooltip";
+import { formatDistanceToNow } from "date-fns";
 
 const LecturePage = () => {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ const LecturePage = () => {
   const [highlightedText, setHighlightedText] = useState([]);
   const hasSeeked = useRef(false);
   const latestState = useRef({ watchTime, notes, highlightedText });
+  const [userInteraction, setUserInteraction] = useState(false);
 
   const courseId = params.courseId.toString();
 
@@ -80,9 +82,11 @@ const LecturePage = () => {
   );
 
   useEffect(() => {
-    latestState.current = { watchTime, notes, highlightedText };
-    debouncedSendData();
-  }, [watchTime, notes, highlightedText, debouncedSendData]);
+    if (lecture && userInteraction) {
+      latestState.current = { watchTime, notes, highlightedText };
+      debouncedSendData();
+    }
+  }, [watchTime, notes, highlightedText]);
 
   async function updateUserDataLectureData(latestState) {
     try {
@@ -107,7 +111,11 @@ const LecturePage = () => {
     }
   }
 
-  return (
+  return !lecture ? (
+    <div className="pt-6 dark:text-slate-200">
+      <p>Loading lecture content...</p>
+    </div>
+  ) : (
     <div className="">
       <div className="flex justify-between">
         <div>
@@ -164,9 +172,27 @@ const LecturePage = () => {
         <div className="mb-2 text-lg font-bold dark:text-slate-200">
           Lecture Description
         </div>
-        <div className="flex  p-4 gap-x-4 bg-gray-50 dark:bg-slate-800 dark:text-slate-200 items-start rounded-lg">
+        <div className="flex p-4 gap-x-4 bg-gray-50 dark:bg-slate-800 dark:text-slate-200 items-start rounded-lg">
           <BookOpenIcon className="min-w-6 size-6"></BookOpenIcon>
-          <div className="grow whitespace-pre-wrap">{lecture.description}</div>
+          <div>
+            <div className="grow whitespace-pre-wrap">
+              {lecture.description}
+            </div>
+            <div className="text-sm font-light">
+              Created:{" "}
+              {lecture.createdAt &&
+                formatDistanceToNow(new Date(lecture.createdAt), {
+                  addSuffix: true,
+                })}
+            </div>
+            <div className="text-sm font-light">
+              Updated:{" "}
+              {lecture.updatedAt &&
+                formatDistanceToNow(new Date(lecture.updatedAt), {
+                  addSuffix: true,
+                })}
+            </div>
+          </div>
         </div>
       </div>
       <div className="mt-5 grid grid-flow-row grid-cols-1 lg:grid-cols-3 gap-5">
@@ -180,14 +206,13 @@ const LecturePage = () => {
                 hasSeeked.current = true;
               }
             }}
+            onPlay={() => {
+              !userInteraction && setUserInteraction(true);
+            }}
             width="100%"
             height="100%"
             controls={true}
-            url={
-              lecture.videoUrl
-                ? lecture.videoUrl
-                : "/uploads/videos/example.mp4"
-            }
+            url={lecture.videoUrl}
           ></ReactPlayer>
         </div>
         <div className="col-span-1 border rounded-lg dark:bg-slate-800">
@@ -200,19 +225,22 @@ const LecturePage = () => {
       </div>
       <div className="mt-5 grid grid-flow-row sm:grid-cols-1 md:grid-cols-2 gap-5">
         <div className="border rounded-lg aspect-square p-1 bg-[#f0ecec] dark:bg-[#302c2c]">
-          <PDFViewer
-            pdfUrl={
-              lecture.pdfUrl ? lecture.pdfUrl : "/uploads/pdfs/example.pdf"
-            }
-            highlightedText={highlightedText}
-            setHighlightedText={setHighlightedText}
-          ></PDFViewer>
+          {lecture.pdfUrl && (
+            <PDFViewer
+              pdfUrl={lecture.pdfUrl}
+              highlightedText={highlightedText}
+              setHighlightedText={setHighlightedText}
+              userInteraction={userInteraction}
+              setUserInteraction={setUserInteraction}
+            ></PDFViewer>
+          )}
         </div>
         <div className="rounded-lg aspect-square">
           <textarea
             value={notes}
             onChange={(e) => {
               setNotes(e.target.value);
+              !userInteraction && setUserInteraction(true);
             }}
             className="w-full h-full text-gray-900 dark:text-slate-200 p-2 border rounded-lg bg-orange-50 dark:bg-sky-900/60 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
             placeholder="Write private notes here..."

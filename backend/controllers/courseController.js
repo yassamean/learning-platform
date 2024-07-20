@@ -1,5 +1,7 @@
 import { Course, User } from "../models/index.js";
 import { Lecture } from "../models/index.js";
+import { UserData } from "../models/index.js";
+import { Comment } from "../models/index.js";
 
 export async function getCourses(req, res) {
   try {
@@ -42,7 +44,7 @@ export async function setCourse(req, res) {
       lecturedBy: req.body.lecturedBy,
       lecturingDays: req.body.lecturingDays,
       studyProgram: req.body.studyProgram,
-      isOpenToEnroll: true,
+      isOpenToEnroll: req.body.isOpenToEnroll,
     });
     res.status(200).json(course);
   } catch (error) {
@@ -97,6 +99,7 @@ export async function deleteCourse(req, res) {
 
     res.status(200).json({ message: "Course deleted successfully" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error", error });
   }
 }

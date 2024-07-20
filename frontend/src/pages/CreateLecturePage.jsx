@@ -22,18 +22,19 @@ export default function CreateLecturePage() {
   const navigate = useNavigate();
   const params = useParams();
 
-  const [videoUrlInput, setVideoUrlInput] = useState("");
+  const [videoUrlInput, setVideoUrlInput] = useState(
+    "/uploads/videos/example.mp4"
+  );
   const [loading, setLoading] = useState({
     video: false,
     pdf: false,
   });
-  const [pdfUrlInput, setPdfUrlInput] = useState("");
+  const [pdfUrlInput, setPdfUrlInput] = useState("/uploads/pdfs/example.pdf");
   const [isNew, setIsNew] = useState(true);
   const [form, setForm] = useState({
     title: "",
     description: "",
     videoUrl: "",
-    thumbnailUrl: "",
     pdfUrl: "",
     course: "",
   });
@@ -184,6 +185,10 @@ export default function CreateLecturePage() {
     e.preventDefault();
     const lecture = { ...form };
     // delete files if changed
+    if (!form.name) {
+      !form.name && toast.error("Please provide a lecture title");
+      return;
+    }
     if (videoUrlInput != lecture.videoUrl) {
       lecture.videoUrl.includes("public.blob.vercel-storage.com") &&
         handleFileDelete(lecture.videoUrl);
@@ -250,7 +255,8 @@ export default function CreateLecturePage() {
                 htmlFor="name"
                 className="block text-sm font-medium leading-6 text-gray-900 dark:text-slate-200"
               >
-                Lecture Title
+                Lecture Title{" "}
+                <span className="text-sm font-light text-gray-400">*</span>
               </label>
               <div className="mt-2">
                 <div className="flex rounded-md shadow-sm ring-1 ring-gray-300 sm:max-w-md">
@@ -300,7 +306,7 @@ export default function CreateLecturePage() {
                   <div className="relative flex flex-col items-center justify-center mt-2 aspect-video md:w-1/2 lg:w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
                     <div
                       className={
-                        "absolute z-10 px-2 top-2 left-2 text-sm font-medium bg-white dark:bg-slate-700 dark:text-slate-200 rounded lg"
+                        "absolute z-10 px-2 top-2 left-2 text-sm font-medium bg-white dark:bg-slate-700 dark:text-slate-200 rounded-lg"
                       }
                     >
                       Preview
@@ -445,10 +451,10 @@ export default function CreateLecturePage() {
                   </div>
                 </div>
                 {(loading.pdf || pdfUrlInput) && (
-                  <div className="relative flex flex-col items-center justify-center mt-2 aspect-video md:w-1/2 lg:w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
+                  <div className="relative flex flex-col items-center justify-center mt-2 aspect-video sm:h-96 md:h-[312px] md:w-1/2 lg:w-1/3 rounded-lg border border-dashed border-gray-900/25 p-1 dark:border-slate-400 dark:bg-slate-800">
                     <div
                       className={
-                        "absolute z-10 px-2 top-2 left-2 text-sm font-medium bg-white dark:bg-slate-700 dark:text-slate-200 rounded lg"
+                        "absolute z-10 px-2 top-2 left-2 text-sm font-medium bg-white dark:bg-slate-700 dark:text-slate-200 rounded-lg"
                       }
                     >
                       Preview
@@ -491,6 +497,9 @@ export default function CreateLecturePage() {
           </div>
         </div>
       </div>
+      <span className="text-sm font-light text-gray-400">
+        * Required fields
+      </span>
       <div className="mt-6 flex items-center justify-between gap-x-6">
         {!isNew ? (
           <button

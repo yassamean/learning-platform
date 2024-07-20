@@ -45,11 +45,6 @@ const studentOptions = [
     href: "/quizzes",
     icon: PuzzlePieceIcon,
   },
-  // {
-  //   name: "Settings",
-  //   href: "/me",
-  //   icon: Cog6ToothIcon,
-  // },
 ];
 
 // We should keep track of what courses each teacher
@@ -67,11 +62,6 @@ const teacherOptions = [
     href: "/courses",
     icon: FolderOpenIcon,
   },
-  // {
-  //   name: "Settings",
-  //   href: "/me",
-  //   icon: Cog6ToothIcon,
-  // },
 ];
 
 const adminOptions = [
@@ -85,11 +75,6 @@ const adminOptions = [
     href: "/courses",
     icon: FolderOpenIcon,
   },
-  // {
-  //   name: "Settings",
-  //   href: "/me",
-  //   icon: Cog6ToothIcon,
-  // },
 ];
 
 function getOptions(user) {
@@ -129,52 +114,52 @@ export default function MenuDropdown() {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1"
       >
-        <PopoverPanel className="absolute -left-44 z-10 mt-5 flex w-screen max-w-max -translate-x-1/2 px-4">
-          <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 dark:bg-slate-800 dark:text-slate-200">
+        <PopoverPanel className="absolute left-1/2 z-20 mt-5 flex w-screen max-w-max -translate-x-[92%] px-4 transition data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in">
+          <div className="w-screen max-w-md flex-auto overflow-hidden rounded-xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5 dark:bg-slate-800 dark:text-slate-200">
             <div className="p-4">
               {user && (
-                <NavLink
-                  to={"/dashboard"}
-                  className="group relative flex items-center gap-x-6 rounded-lg p-4 hover:bg-gray-200  dark:hover:bg-sky-900"
+                <PopoverButton
+                  onClick={() => navigate("/dashboard")}
+                  className="group relative flex w-full items-center gap-x-6 rounded-lg p-4 hover:bg-gray-200  dark:hover:bg-sky-900"
                 >
-                  <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                  <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                     <HomeIcon
                       className="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
                       aria-hidden="true"
                     />
                   </div>
                   Dashboard
-                </NavLink>
+                </PopoverButton>
               )}
               {dropdownOptions.map((item) => (
-                <NavLink
-                  to={item.href}
+                <PopoverButton
+                  onClick={() => navigate(item.href)}
                   key={item.name}
-                  className="group relative flex items-center gap-x-6 rounded-lg p-4 hover:bg-gray-200  dark:hover:bg-sky-900"
+                  className="group relative flex w-full items-center gap-x-6 rounded-lg p-4 hover:bg-gray-200  dark:hover:bg-sky-900"
                 >
-                  <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                  <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                     <item.icon
                       className="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
                       aria-hidden="true"
                     />
                   </div>
                   {item.name}
-                </NavLink>
+                </PopoverButton>
               ))}
               {user != null ? (
-                <NavLink
+                <PopoverButton
                   onClick={handleLogout}
                   key={"logout"}
-                  className="group relative flex items-center gap-x-6 rounded-lg p-4 hover:bg-gray-200  dark:hover:bg-sky-900"
+                  className="group relative flex w-full items-center gap-x-6 rounded-lg p-4 hover:bg-gray-200  dark:hover:bg-sky-900"
                 >
-                  <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                  <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                     <ArrowLeftStartOnRectangleIcon
                       className="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
                       aria-hidden="true"
                     />
                   </div>
                   Log Out
-                </NavLink>
+                </PopoverButton>
               ) : null}
             </div>
           </div>

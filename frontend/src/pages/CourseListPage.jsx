@@ -45,7 +45,11 @@ export default function CourseListPage({ search }) {
     getEnrollments();
   }, []);
 
-  return (
+  return !courses ? (
+    <div className="pt-6 dark:text-slate-200">
+      <p>Loading courses...</p>
+    </div>
+  ) : (
     <div className="flex flex-col ">
       <div className="pt-10 flex justify-between items-center">
         <div>
@@ -69,11 +73,6 @@ export default function CourseListPage({ search }) {
           )}
         </div>
       </div>
-      {!courses && (
-        <div className="pt-6 dark:text-slate-200">
-          <p>Loading courses...</p>
-        </div>
-      )}
       {courses && (
         <>
           {courses.length === 0 && (

@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
 import { API_BASE_URL } from "../config";
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import toast from "react-hot-toast";
 import {
   ArrowUpOnSquareIcon,
   FolderPlusIcon,
@@ -51,7 +52,12 @@ export default function CreateCoursePage() {
   ];
 
   const isValid = () => {
-    return form.name && form.semester && form.studyProgram && form.lecturedBy;
+    return (
+      form.name &&
+      form.semester &&
+      form.studyProgram.length &&
+      form.lecturingDays.length
+    );
   };
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -119,6 +125,7 @@ export default function CreateCoursePage() {
   };
 
   const getSemesterInfo = () => {
+    // calculates 4 Semesters from current Date
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
@@ -195,6 +202,15 @@ export default function CreateCoursePage() {
   async function onSubmit(e) {
     e.preventDefault();
     const course = { ...form };
+    if (!isValid()) {
+      !form.name && toast.error("Please provide a course title");
+      !form.semester && toast.error("Please provide a course semester");
+      !form.studyProgram.length &&
+        toast.error("Please provide at least one study program");
+      !form.lecturingDays.length &&
+        toast.error("Please provide at least one lecturing day");
+      return;
+    }
     try {
       let response;
       if (isNew) {
@@ -238,14 +254,14 @@ export default function CreateCoursePage() {
               ? "editing your existing course"
               : "creating a new Course"}
           </p>
-
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-4">
               <label
                 htmlFor="name"
                 className="block text-sm font-medium leading-6 text-gray-900 dark:text-slate-200"
               >
-                Course Title
+                Course Title{" "}
+                <span className="text-sm font-light text-gray-400">*</span>
               </label>
               <div className="mt-2">
                 <div className="flex rounded-md shadow-sm ring-1 ring-gray-300 sm:max-w-md">
@@ -260,7 +276,6 @@ export default function CreateCoursePage() {
                 </div>
               </div>
             </div>
-
             <div className="col-span-full">
               <label
                 htmlFor="description"
@@ -385,7 +400,8 @@ export default function CreateCoursePage() {
           <div className="grid gap-5 grid-flow-col items-start">
             <fieldset>
               <legend className="text-sm font-semibold leading-6 text-gray-900 dark:text-slate-200">
-                Study Program
+                Study Program{" "}
+                <span className="text-sm font-light text-gray-400">*</span>
               </legend>
               <p className="mt-1 text-sm leading-6 text-gray-600 dark:text-slate-400">
                 For which study programs is the course available
@@ -414,7 +430,8 @@ export default function CreateCoursePage() {
             </fieldset>
             <fieldset>
               <legend className="text-sm font-semibold leading-6 text-gray-900 dark:text-slate-200">
-                Lecturing Days
+                Lecturing Days{" "}
+                <span className="text-sm font-light text-gray-400">*</span>
               </legend>
               <p className="mt-1 text-sm leading-6 text-gray-600 dark:text-slate-400">
                 Choose the days the course will get new lectures
@@ -447,7 +464,8 @@ export default function CreateCoursePage() {
           <div className="grid gap-5 grid-flow-col items-start">
             <fieldset>
               <legend className="text-sm font-semibold leading-6 text-gray-900 dark:text-slate-200">
-                Semester
+                Semester{" "}
+                <span className="text-sm font-light text-gray-400">*</span>
               </legend>
               <p className="mt-1 text-sm leading-6 text-gray-600 dark:text-slate-400">
                 This selects the semester the course will take place
@@ -504,7 +522,9 @@ export default function CreateCoursePage() {
           </div>
         </div>
       </div>
-
+      <span className="text-sm font-light text-gray-400">
+        * Required fields
+      </span>
       <div className="mt-6 flex items-center justify-between gap-x-6">
         {!isNew ? (
           <button
@@ -518,7 +538,7 @@ export default function CreateCoursePage() {
           <div></div>
         )}
         <button
-          disabled={!isValid()}
+          // disabled={!isValid()}
           type="submit"
           className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-300 dark:text-slate-200 dark:hover:bg-sky-900 dark:hover:text-sky-400  disabled:cursor-not-allowed"
         >
