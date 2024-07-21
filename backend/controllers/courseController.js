@@ -2,6 +2,7 @@ import { Course, User } from "../models/index.js";
 import { Lecture } from "../models/index.js";
 import { UserData } from "../models/index.js";
 import { Comment } from "../models/index.js";
+import { del } from "@vercel/blob";
 
 export async function getCourses(req, res) {
   try {
@@ -89,6 +90,7 @@ export async function deleteCourse(req, res) {
         { $pull: { lectureData: { lectureId: lect._id } } }
       );
       await Comment.deleteMany({ lectureId: lect._id });
+
       if (lect.videoUrl.includes("public.blob.vercel-storage.com")) {
         await del(lect.videoUrl);
       }
