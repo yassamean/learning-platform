@@ -41,38 +41,54 @@ export default function CreateLecturePage() {
 
   const onDropVideo = useCallback(
     async (acceptedFiles) => {
+      if (acceptedFiles.length == 0) {
+        toast.error("Only .mp4 files can be selected");
+        return;
+      } else if (acceptedFiles.length > 1) {
+        toast.error("Please only select one file");
+        return;
+      }
       const file = acceptedFiles[0];
 
       if (file.size > 50 * 1024 * 1024) {
         // 50 MB size limit
-        toast.error("Video file size exceeds 5 MB");
+        toast.error("Video file size exceeds 50 MB");
         return;
-      }
-      setVideoUrlInput("");
-      setLoading({ ...loading, video: true });
-      const blob = await handleFileUpload(file);
-      setLoading({ ...loading, video: false });
+      } else {
+        setVideoUrlInput("");
+        setLoading({ ...loading, video: true });
+        const blob = await handleFileUpload(file);
+        setLoading({ ...loading, video: false });
 
-      setVideoUrlInput(blob.url);
+        setVideoUrlInput(blob.url);
+      }
     },
     [setForm, setVideoUrlInput]
   );
 
   const onDropPdf = useCallback(
     async (acceptedFiles) => {
+      if (acceptedFiles.length == 0) {
+        toast.error("Only .pdf files can be selected");
+        return;
+      } else if (acceptedFiles.length > 1) {
+        toast.error("Please only select one file");
+        return;
+      }
       const file = acceptedFiles[0];
 
       if (file.size > 5 * 1024 * 1024) {
         // 5 MB size limit
         toast.error("PDF file size exceeds 5 MB");
         return;
-      }
-      setPdfUrlInput("");
-      setLoading({ ...loading, pdf: true });
-      const blob = await handleFileUpload(file);
-      setLoading({ ...loading, pdf: false });
+      } else {
+        setPdfUrlInput("");
+        setLoading({ ...loading, pdf: true });
+        const blob = await handleFileUpload(file);
+        setLoading({ ...loading, pdf: false });
 
-      setPdfUrlInput(blob.url);
+        setPdfUrlInput(blob.url);
+      }
     },
     [setForm, setPdfUrlInput]
   );
@@ -81,16 +97,12 @@ export default function CreateLecturePage() {
     useDropzone({
       onDrop: onDropVideo,
       accept: { "video/mp4": [".mp4"] },
-      maxFiles: 1,
-      maxSize: 1024 * 1024 * 50,
     });
 
   const { getRootProps: getPdfRootProps, getInputProps: getPdfInputProps } =
     useDropzone({
       onDrop: onDropPdf,
       accept: { "application/pdf": [".pdf"] },
-      maxFiles: 1,
-      maxSize: 1024 * 1024 * 5,
     });
 
   function updateForm(value) {
