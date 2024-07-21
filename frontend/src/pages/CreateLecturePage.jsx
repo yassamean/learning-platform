@@ -185,8 +185,8 @@ export default function CreateLecturePage() {
     e.preventDefault();
     const lecture = { ...form };
     // delete files if changed
-    if (!form.name) {
-      !form.name && toast.error("Please provide a lecture title");
+    if (!form.title) {
+      toast.error("Please provide a lecture title");
       return;
     }
     if (videoUrlInput != lecture.videoUrl) {
