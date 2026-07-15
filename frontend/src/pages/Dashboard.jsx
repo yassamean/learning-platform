@@ -51,7 +51,7 @@ const tiles = [
   },
   {
     title: "Manage Quizzes",
-    description: "Manage quizzes for course lectures",
+    description: "Manage quizzes for course lectures.",
     buttonText: "Go to Quiz Management",
     role: ["teacher"],
     buttonLink: "/quizzes",
@@ -74,20 +74,23 @@ const Dashboard = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTiles.map((tile, index) => (
           <div
             key={index}
-            className="bg-white z-10 shadow rounded-lg p-6 dark:bg-slate-800"
+            className="bg-white z-10 shadow rounded-lg p-6 dark:bg-slate-800 flex flex-col justify-between"
           >
-            <h3 className="text-xl font-semibold text-gray-800 mb-2 dark:text-slate-200">
-              {tile.title}
-            </h3>
-            <p className="text-gray-600 dark:text-slate-400">
-              {tile.description}
-            </p>
-            <Link to={tile.buttonLink}>
-              <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg ">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2 dark:text-slate-200">
+                {tile.title}
+              </h3>
+              <p className="text-gray-600 dark:text-slate-400">
+                {tile.description}
+              </p>
+            </div>
+            
+            <Link to={tile.buttonLink} className="mt-4 block">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg">
                 {tile.buttonText}
               </button>
             </Link>
