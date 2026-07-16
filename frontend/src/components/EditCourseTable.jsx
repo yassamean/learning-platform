@@ -65,12 +65,12 @@ export default function CourseTable() {
 
   // This method will delete a record
   async function deleteCourse(id) {
-    await fetch(`http://localhost:5050/courses/${id}`, {
-      method: "DELETE",
-    });
-    const newCourses = courses.filter((el) => el._id !== id);
-    setCourses(newCourses);
-  }
+  await fetch(`${import.meta.env.VITE_API_URL}/courses/${id}`, {
+    method: "DELETE",
+  });
+  const newCourses = courses.filter((el) => el._id !== id);
+  setCourses(newCourses);
+}
 
   // This following section will display the table with the records of individuals.
   return (
