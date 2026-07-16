@@ -142,7 +142,7 @@ const RegisterPage = () => {
         {import.meta.env.MODE === "production" ? (
           <div className="mb-4">
             <ReCAPTCHA
-              sitekey="6Leb0f0pAAAAAEIHe2ZYSnst33YlW16v1F_TWUb2"
+              sitekey="6LdDHFctAAAAAGVsUJjK-TQ8gAtfFdCzT2buzjz9"
               ref={recaptcha}
             />
           </div>
