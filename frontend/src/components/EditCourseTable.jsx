@@ -49,19 +49,19 @@ export default function CourseTable() {
 
   // This method fetches the records from the database.
   useEffect(() => {
-    async function getCourses() {
-      const response = await fetch(`http://localhost:5050/courses/`);
-      if (!response.ok) {
-        const message = `An error occurred: ${response.statusText}`;
-        console.error(message);
-        return;
-      }
-      const courses = await response.json();
-      setCourses(courses);
+  async function getCourses() {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/courses/`);
+    if (!response.ok) {
+      const message = `An error occurred: ${response.statusText}`;
+      console.error(message);
+      return;
     }
-    getCourses();
-    return;
-  }, [courses.length]);
+    const courses = await response.json();
+    setCourses(courses);
+  }
+  getCourses();
+  return;
+}, [courses.length]);
 
   // This method will delete a record
   async function deleteCourse(id) {

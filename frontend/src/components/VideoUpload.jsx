@@ -16,10 +16,10 @@ const VideoUpload = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5050/upload/video", {
-        method: "POST",
-        body: formData,
-      });
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/upload/video`, {
+      method: "POST",
+    body: formData,
+  });
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
