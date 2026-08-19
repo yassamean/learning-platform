@@ -1,21 +1,19 @@
-import nodemailer from "nodemailer";
-import { SENDER_EMAIL_ADDRESS, SENDER_EMAIL_PASSWORD } from "./config.js";
+import { SENDER_EMAIL_ADDRESS, BREVO_API_KEY } from "./config.js";
 
 export const sendEmail = async (email, subject, resetLink) => {
 	try {
-		const transporter = nodemailer.createTransport({
-			service: "gmail",
-			auth: {
-				user: SENDER_EMAIL_ADDRESS,
-				pass: SENDER_EMAIL_PASSWORD,
+		const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+				"api-key": BREVO_API_KEY,
 			},
-		});
-
-		await transporter.sendMail({
-			from: SENDER_EMAIL_ADDRESS,
-			to: email,
-			subject: subject,
-			html: `
+			body: JSON.stringify({
+				sender: { email: SENDER_EMAIL_ADDRESS },
+				to: [{ email }],
+				subject: subject,
+				htmlContent: `
 				<!DOCTYPE html>
 				<html lang="en">
 					<head>
@@ -78,7 +76,13 @@ export const sendEmail = async (email, subject, resetLink) => {
 						</div>
 					</body>
 				</html>`,
+			}),
 		});
+
+		if (!response.ok) {
+			const errorBody = await response.text();
+			throw new Error(`Brevo API error (${response.status}): ${errorBody}`);
+		}
 
 		console.log("email sent sucessfully");
 	} catch (error) {

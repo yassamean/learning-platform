@@ -57,10 +57,15 @@ export default function CreateLecturePage() {
       } else {
         setVideoUrlInput("");
         setLoading({ ...loading, video: true });
-        const blob = await handleFileUpload(file);
-        setLoading({ ...loading, video: false });
-
-        setVideoUrlInput(blob.url);
+        try {
+          const blob = await handleFileUpload(file);
+          setVideoUrlInput(blob.url);
+        } catch (error) {
+          console.error("Error uploading video:", error);
+          toast.error("Failed to upload video. Please try again.");
+        } finally {
+          setLoading({ ...loading, video: false });
+        }
       }
     },
     [setForm, setVideoUrlInput]
@@ -84,10 +89,15 @@ export default function CreateLecturePage() {
       } else {
         setPdfUrlInput("");
         setLoading({ ...loading, pdf: true });
-        const blob = await handleFileUpload(file);
-        setLoading({ ...loading, pdf: false });
-
-        setPdfUrlInput(blob.url);
+        try {
+          const blob = await handleFileUpload(file);
+          setPdfUrlInput(blob.url);
+        } catch (error) {
+          console.error("Error uploading PDF:", error);
+          toast.error("Failed to upload PDF. Please try again.");
+        } finally {
+          setLoading({ ...loading, pdf: false });
+        }
       }
     },
     [setForm, setPdfUrlInput]
@@ -156,6 +166,9 @@ export default function CreateLecturePage() {
     );
 
     const newBlob = await response.json();
+    if (!response.ok) {
+      throw new Error(newBlob.message || "Failed to upload file");
+    }
     return newBlob;
   }
 
@@ -202,12 +215,12 @@ export default function CreateLecturePage() {
       return;
     }
     if (videoUrlInput != lecture.videoUrl) {
-      lecture.videoUrl.includes("public.blob.vercel-storage.com") &&
+      (lecture.videoUrl || "").includes("public.blob.vercel-storage.com") &&
         handleFileDelete(lecture.videoUrl);
       lecture.videoUrl = videoUrlInput;
     }
     if (pdfUrlInput != lecture.pdfUrl) {
-      lecture.pdfUrl.includes("public.blob.vercel-storage.com") &&
+      (lecture.pdfUrl || "").includes("public.blob.vercel-storage.com") &&
         handleFileDelete(lecture.pdfUrl);
       lecture.pdfUrl = pdfUrlInput;
     }

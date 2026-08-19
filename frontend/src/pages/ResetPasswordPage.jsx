@@ -34,6 +34,8 @@ const ResetPasswordPage = () => {
       toast.dismiss();
       toast.success("Email sent successfully");
     } catch (error) {
+      toast.dismiss();
+      toast.error("Something went wrong. Please try again later.");
       console.error(error);
     }
   };
