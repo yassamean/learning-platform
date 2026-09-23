@@ -75,7 +75,7 @@ const CommentSection = ({ videoSeekTo }) => {
       <div key={index} className="mx-2">
         <div>
           <span className=" dark:text-slate-200">
-            {comment.userId.username}
+            {comment.userId?.username || "Deleted user"}
           </span>
           <span className="ml-2 text-sm font-thin dark:text-slate-400">
             {formatDistanceToNow(comment.updatedAt, {
