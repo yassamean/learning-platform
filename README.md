@@ -52,7 +52,9 @@ This should point to wherever the backend is running, for example http://localho
 ## Test accounts
 
 Teacher login: username teacher, password teacher
+
 Admin login: username admin, password admin
+
 Student accounts you can just make yourself on the register page, with your own email or a fake one.
 
 ## Deployment
